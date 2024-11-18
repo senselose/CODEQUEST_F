@@ -11,3 +11,15 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* @font-face {
+  font-family: 'Dovemayo_gothic';
+  src: url('./fonts/Dovemayo_gothic.ttf') format('truetype');
+} */
+
+@font-face {
+  font-family: 'insungit_Regular';
+  src: url('./fonts/insungit_Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

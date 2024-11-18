@@ -12,10 +12,12 @@ function Board() {
   ]);
 
   return (
+    
     <div style={{ padding: '20px' }}>
       <Typography variant="h4" gutterBottom>
         게시판
       </Typography>
+      
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -48,6 +50,7 @@ function Board() {
         </Table>
       </TableContainer>
     </div>
+
   );
 }
 

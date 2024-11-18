@@ -36,3 +36,25 @@
     transform: rotate(360deg);
   }
 }
+
+@font-face {
+  font-family: 'Dovemayo_gothic';
+  src: url('./fonts/Dovemayo_gothic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+
+@font-face {
+  font-family: 'insungit_Regular';
+  src: url('./fonts/insungit_Regular.ttf') format('truetype');  font-weight: normal;
+  font-style: normal;
+}
+
+
+body {
+  /* font-family: 'Dovemayo_gothic', sans-serif; */
+  font-family: 'insungit_Regular', sans-serif;
+
+}
