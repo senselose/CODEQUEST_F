@@ -59,7 +59,7 @@ function Login() {
               console.log("썸네일 이미지:", profile.thumbnail_image_url);
               console.log("고해상도 이미지:", profile.profile_image_url);
               alert("카카오 로그인 성공!");
-              navigate('/components/board');
+              navigate('/boardList');
             },
             fail: (err) => {
               console.error("Kakao API Request Failed:", err);
@@ -79,7 +79,7 @@ function Login() {
       const response = await axios.post('http://localhost:8080/api/auth/login', { id, password });
       if (response.data === "Login Successful") {
         alert("로그인 성공");
-        navigate("/components/board");
+        navigate("/boardList");
       } else {
         alert("로그인 실패");
       }
