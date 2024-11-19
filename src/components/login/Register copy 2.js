@@ -256,6 +256,7 @@ function Register() {
           style: {
             borderRadius: '15px',
             maxWidth: '500px',
+            // marginTop:'30px'
             textAlign: 'center',
           },
         }}
@@ -276,13 +277,20 @@ function Register() {
             lineHeight: 1.8,
           }}
         >
-          <DialogContentText>
-            <strong>1. 수집하는 개인정보 항목</strong>: 이름, 이메일, 닉네임, 아이디<br />
-            <strong>2. 이용 목적</strong>: 회원관리, 서비스 제공 및 개선<br />
-            <strong>3. 보유 및 이용 기간</strong>: 회원 탈퇴 시까지. 단, 관련 법령에 따라 일정 기간 보존<br />
-            <strong>4. 제3자 제공 여부</strong>: 없음<br />
-            <strong>5. 동의 철회 방법</strong>: 회원정보 수정 페이지에서 철회 가능<br />
-          </DialogContentText>
+      <DialogContentText
+        sx={{
+          marginY: 2, // 상하 여백 추가 (margin-top, margin-bottom)
+          lineHeight: 1.8, // 텍스트 줄 간격 조정
+        }}
+      >
+        <br />
+        <strong>1. 수집하는 개인정보 항목</strong>: 이름, 이메일, 닉네임, 아이디<br />
+        <strong>2. 이용 목적</strong>: 회원관리, 서비스 제공 및 개선<br />
+        <strong>3. 보유 및 이용 기간</strong>: 회원 탈퇴 시까지. 단, 관련 법령에 따라 일정 기간 보존<br />
+        <strong>4. 제3자 제공 여부</strong>: 없음<br />
+        <strong>5. 동의 철회 방법</strong>: 회원정보 수정 페이지에서 철회 가능<br />
+      </DialogContentText>
+
         </DialogContent>
         <DialogActions
           sx={{
