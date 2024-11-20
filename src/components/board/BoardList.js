@@ -54,9 +54,9 @@ function BoardList({ showSearch = true, showWriteButton = true }) {
   };
 
   return (
-    <Container maxWidth="md" style={{ padding: '0px' }}>
+    <Container maxWidth="md">
       {/* 제목과 옵션 */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
         {/* <Typography variant="h4">게시판</Typography> */}
         {showWriteButton && (
           <Link to="/create" style={{ textDecoration: 'none' }}>
@@ -95,22 +95,21 @@ function BoardList({ showSearch = true, showWriteButton = true }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {posts.map((post, index) => (
-              <TableRow 
-                key={post.boardId}
-                hover
-                onClick={() => handleRowClick(post.boardId)}
-                style={{ cursor: 'pointer' }}
-              >
-                {/* <TableCell align="center">{index + 1 + (currentPage - 1) * postsPerPage}</TableCell> */}
-                <TableCell align="center">{post.title}</TableCell>
-                <TableCell align="center">{post.nickname}</TableCell>
-                <TableCell align="center">{post.views}</TableCell>
-                <TableCell align="center">{post.likes}</TableCell>
-                {/* <TableCell align="center">{new Date(post.createdAt).toLocaleDateString()}</TableCell> */}
-              </TableRow>
-            ))}
-          </TableBody>
+  {posts.map((post, index) => (
+    <TableRow 
+      key={post.boardId}
+      hover
+      onClick={() => handleRowClick(post.boardId)}
+      style={{ cursor: 'pointer' }}
+    >
+      <TableCell align="center">{post.title}</TableCell>
+      <TableCell align="center">{post.nickname}</TableCell>
+      <TableCell align="center">{post.views}</TableCell>
+      {/* 좋아요가 객체 배열인 경우 개수를 렌더링 */}
+      <TableCell align="center">{post.likes ? post.likes.length : 0}</TableCell>
+    </TableRow>
+  ))}
+</TableBody>
         </Table>
       </TableContainer>
 
