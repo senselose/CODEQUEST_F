@@ -1,33 +1,58 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
 import {
   Typography, Container, Paper, Box, Divider,
   Button, TextField
 } from '@mui/material';
 
 function BoardDetail() {
-  const { id } = useParams();
-  const [post, setPost] = useState(null);
-  const [comments, setComments] = useState([]); // 댓글 데이터
+  const { id } = useParams(); // 게시글 ID
+  const [post, setPost] = useState({ likes: [] }); // 게시글 데이터 초기화
+  const [comments, setComments] = useState([]); // 댓글 데이터 초기화
   const [newComment, setNewComment] = useState(''); // 새 댓글 내용
-  const navigate = useNavigate();
+  const [liked, setLiked] = useState(false); // 현재 사용자가 좋아요를 눌렀는지 여부
+  const [likeCount, setLikeCount] = useState(0); // 게시글 좋아요 수
+
+  const state = useSelector((state) => state);
+  console.log('Redux 전체 상태:', state);
+  
+  const userId = state.auth?.userId || null;
+  console.log('Redux 상태에서 가져온 userId:', userId);
+  
 
   useEffect(() => {
-    fetchPost();
+    fetchPost(); // 게시글 데이터 가져오기
+    fetchComments(); // 댓글 데이터 가져오기
     incrementViews(); // 조회수 증가
+    fetchLikeStatus(); // 좋아요 상태 가져오기
   }, [id]);
 
+  // 게시글 데이터 가져오기
   const fetchPost = async () => {
     try {
       const response = await axios.get(`http://localhost:8080/api/boards/${id}`);
-      setPost(response.data);
-      setComments(response.data.comments || []); // 댓글 데이터 초기화
+      const postData = response.data;
+
+      setPost(postData);
+      setLikeCount(postData.likes ? postData.likes.length : 0); // 좋아요 수 초기화
     } catch (error) {
       console.error('Error fetching post:', error);
     }
   };
 
+  // 댓글 데이터 가져오기
+  const fetchComments = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/comments/board/${id}`);
+      setComments(response.data);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
+
+  // 조회수 증가
   const incrementViews = async () => {
     try {
       await axios.put(`http://localhost:8080/api/boards/${id}/views`);
@@ -36,53 +61,65 @@ function BoardDetail() {
     }
   };
 
+  // 좋아요 상태 가져오기
+  const fetchLikeStatus = async () => {
+    if (!userId) {
+      console.warn('userId가 null입니다. 좋아요 상태를 확인할 수 없습니다.');
+      return;
+    }
+    try {
+      const response = await axios.get(`http://localhost:8080/api/boards/${id}/like-status`, {
+        params: { userId },
+      });
+      setLiked(response.data);
+    } catch (error) {
+      console.error('Error fetching like status:', error);
+    }
+  };
+  
+  // 좋아요 토글
+  const toggleLike = async () => {
+    try {
+        
+      const response = await axios.post(
+        `http://localhost:8080/api/boards/${id}/like`,
+        { userId }, // JSON 객체로 사용자 ID 전달// 숫자 형식으로 변환
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.data === '좋아요') {
+        setLiked(true);
+        setLikeCount((prev) => prev + 1); // 좋아요 수 증가
+      } else if (response.data === '좋아요 취소') {
+        setLiked(false);
+        setLikeCount((prev) => prev - 1); // 좋아요 수 감소
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
+  };
+
+  // 댓글 추가
   const handleAddComment = async () => {
     if (!newComment.trim()) {
       alert('댓글 내용을 입력해주세요.');
       return;
     }
-  
-    const newCommentData = {
-      id: Date.now(), // 임시 ID
-      nickname: '익명', // 닉네임은 사용자 인증에 따라 변경 가능
-      content: newComment,
-      createdAt: new Date().toISOString(),
-    };
-  
-    const updatedComments = [...comments, newCommentData];
-    const updatedPost = {
-      ...post,
-      comments: updatedComments,
-    };
-  
-    console.log('보내는 데이터:', updatedPost);
-  
+
     try {
-        await axios.put(`http://localhost:8080/api/boards/${id}`, updatedPost, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-      setComments(updatedComments);
+      const response = await axios.post(`http://localhost:8080/api/comments/board/${id}`, {
+        nickname: '익명', // 닉네임 (임시값)
+        content: newComment,
+      });
+      setComments([...comments, response.data]); // 새 댓글 추가
       setNewComment(''); // 입력 필드 초기화
     } catch (error) {
       console.error('Error adding comment:', error);
       alert('댓글 작성에 실패했습니다.');
-    }
-  };
-  
-  const handleDeleteComment = async (commentId) => {
-    try {
-      // 댓글 삭제
-      const updatedComments = comments.filter((comment) => comment.id !== commentId);
-      await axios.put(`http://localhost:8080/api/boards/${id}`, {
-        ...post,
-        comments: updatedComments,
-      });
-      setComments(updatedComments);
-    } catch (error) {
-      console.error('Error deleting comment:', error);
-      alert('댓글 삭제에 실패했습니다.');
     }
   };
 
@@ -111,6 +148,17 @@ function BoardDetail() {
         </Typography>
         <Divider style={{ margin: '20px 0' }} />
 
+        {/* 좋아요 버튼 */}
+        <Box display="flex" justifyContent="flex-end" mb={2}>
+          <Button
+            variant="contained"
+            color={liked ? 'secondary' : 'primary'}
+            onClick={toggleLike}
+          >
+            {liked ? '좋아요 취소' : '좋아요'} ({likeCount || 0})
+          </Button>
+        </Box>
+
         {/* 댓글 목록 */}
         <Box mt={3}>
           <Typography variant="h6" gutterBottom>
@@ -118,20 +166,12 @@ function BoardDetail() {
           </Typography>
           <Divider style={{ marginBottom: '20px' }} />
           {comments.map((comment) => (
-            <Box key={comment.id} mb={2}>
+            <Box key={comment.commentId} mb={2}>
               <Typography variant="body1">{comment.content}</Typography>
               <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Typography variant="subtitle2" color="textSecondary">
                   {comment.nickname} | {new Date(comment.createdAt).toLocaleString()}
                 </Typography>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  size="small"
-                  onClick={() => handleDeleteComment(comment.id)}
-                >
-                  삭제
-                </Button>
               </Box>
               <Divider style={{ margin: '10px 0' }} />
             </Box>
@@ -165,98 +205,97 @@ export default BoardDetail;
 
 // import React, { useEffect, useState } from 'react';
 // import axios from 'axios';
-// import { useParams, useNavigate } from 'react-router-dom';
+// import { useParams } from 'react-router-dom';
 // import {
 //   Typography, Container, Paper, Box, Divider,
-//   Button, Dialog, DialogActions, DialogContent,
-//   DialogContentText, DialogTitle, TextField
+//   Button, TextField
 // } from '@mui/material';
 
 // function BoardDetail() {
-//   const { id } = useParams();
-//   const [post, setPost] = useState(null);
-//   const [comments, setComments] = useState([]); // 댓글 데이터
+//   const { id } = useParams(); // 게시글 ID
+//   const [post, setPost] = useState({ likes: [] }); // 게시글 데이터 초기화
+//   const [comments, setComments] = useState([]); // 댓글 데이터 초기화
 //   const [newComment, setNewComment] = useState(''); // 새 댓글 내용
-//   const [open, setOpen] = useState(false); // 삭제 확인 Dialog 상태
-//   const navigate = useNavigate();
+//   const [liked, setLiked] = useState(false); // 현재 사용자가 좋아요를 눌렀는지 여부
+//   const [likeCount, setLikeCount] = useState(0); // 게시글 좋아요 수
+//   const userId = 1; // 현재 사용자 ID (실제 인증 기반으로 설정)
 
 //   useEffect(() => {
-//     fetchPost();
-//     fetchComments(); // 댓글 가져오기
+//     fetchPost(); // 게시글 데이터 가져오기
+//     fetchComments(); // 댓글 데이터 가져오기
 //     incrementViews(); // 조회수 증가
+//     fetchLikeStatus(); // 좋아요 상태 가져오기
 //   }, [id]);
 
+//   // 게시글 데이터 가져오기
 //   const fetchPost = async () => {
 //     try {
 //       const response = await axios.get(`http://localhost:8080/api/boards/${id}`);
-//       setPost(response.data);
+//       const postData = response.data;
+
+//       setPost(postData);
+//       setLikeCount(postData.likes ? postData.likes.length : 0); // 좋아요 수 초기화
 //     } catch (error) {
 //       console.error('Error fetching post:', error);
 //     }
 //   };
 
-//   const fetchComments = async () => {
+//   // 좋아요 상태 가져오기
+//   const fetchLikeStatus = async () => {
 //     try {
-//       const response = await axios.get(`http://localhost:8080/api/boards/${id}/comments`);
-//       setComments(response.data);
+//       const response = await axios.get(`http://localhost:8080/api/boards/${id}/like-status`, {
+//         params: { userId }, // 사용자 ID 전달
+//       });
+//       setLiked(response.data); // 서버에서 반환된 좋아요 상태 설정
 //     } catch (error) {
-//       console.error('Error fetching comments:', error);
+//       console.error('Error fetching like status:', error);
 //     }
 //   };
 
-//   const incrementViews = async () => {
+//   // 좋아요 토글
+//   const toggleLike = async () => {
 //     try {
-//       await axios.put(`http://localhost:8080/api/boards/${id}/views`);
+//       const response = await axios.post(
+//         `http://localhost:8080/api/boards/${id}/like`,
+//         { userId }, // JSON 객체로 사용자 ID 전달
+//         {
+//           headers: {
+//             'Content-Type': 'application/json',
+//           },
+//         }
+//       );
+
+//       if (response.data === '좋아요') {
+//         setLiked(true);
+//         setLikeCount((prev) => prev + 1); // 좋아요 수 증가
+//       } else if (response.data === '좋아요 취소') {
+//         setLiked(false);
+//         setLikeCount((prev) => prev - 1); // 좋아요 수 감소
+//       }
 //     } catch (error) {
-//       console.error('Error incrementing views:', error);
+//       console.error('Error toggling like:', error);
 //     }
 //   };
 
-//   const incrementLikes = async () => {
-//     try {
-//       const response = await axios.put(`http://localhost:8080/api/boards/${id}/likes`);
-//       setPost((prevPost) => ({ ...prevPost, likes: response.data.likes }));
-//     } catch (error) {
-//       console.error('Error incrementing likes:', error);
-//     }
-//   };
-
+//   // 댓글 추가
 //   const handleAddComment = async () => {
+//     if (!newComment.trim()) {
+//       alert('댓글 내용을 입력해주세요.');
+//       return;
+//     }
+
 //     try {
-//       const response = await axios.post(`http://localhost:8080/api/boards/${id}/comments`, {
+//       const response = await axios.post(`http://localhost:8080/api/comments/board/${id}`, {
+//         nickname: '익명', // 닉네임 (임시값)
 //         content: newComment,
 //       });
-//       setComments((prevComments) => [...prevComments, response.data]); // 새 댓글 추가
+//       setComments([...comments, response.data]); // 새 댓글 추가
 //       setNewComment(''); // 입력 필드 초기화
 //     } catch (error) {
 //       console.error('Error adding comment:', error);
 //       alert('댓글 작성에 실패했습니다.');
 //     }
 //   };
-
-//   const handleDeleteComment = async (commentId) => {
-//     try {
-//       await axios.delete(`http://localhost:8080/api/comments/${commentId}`);
-//       setComments((prevComments) => prevComments.filter((c) => c.id !== commentId));
-//     } catch (error) {
-//       console.error('Error deleting comment:', error);
-//       alert('댓글 삭제에 실패했습니다.');
-//     }
-//   };
-
-//   const handleDelete = async () => {
-//     try {
-//       await axios.delete(`http://localhost:8080/api/boards/${id}`);
-//       alert('게시글이 삭제되었습니다.');
-//       navigate('/BoardList');
-//     } catch (error) {
-//       console.error('Error deleting post:', error);
-//       alert('게시글 삭제에 실패했습니다.');
-//     }
-//   };
-
-//   const handleOpen = () => setOpen(true);
-//   const handleClose = () => setOpen(false);
 
 //   if (!post) return <Typography>게시글을 불러오는 중입니다...</Typography>;
 
@@ -282,46 +321,37 @@ export default BoardDetail;
 //           {post.content}
 //         </Typography>
 //         <Divider style={{ margin: '20px 0' }} />
-//         <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
-//           <Typography variant="subtitle2" color="textSecondary">
-//             조회수: {post.views} | 좋아요: {post.likes}
-//           </Typography>
-//           <Box>
-//             <Button variant="outlined" color="error" onClick={handleOpen} style={{ marginRight: '10px' }}>
-//               삭제하기
-//             </Button>
-//             <Button variant="contained" color="primary" onClick={incrementLikes}>
-//               좋아요
-//             </Button>
-//           </Box>
-//         </Box>
-//       </Paper>
 
-//       {/* 댓글 목록 */}
-//       <Paper elevation={4} style={{ padding: '20px', marginTop: '30px', borderRadius: '8px' }}>
-//         <Typography variant="h6" gutterBottom>
-//           댓글
-//         </Typography>
-//         <Divider style={{ marginBottom: '20px' }} />
-//         {comments.map((comment) => (
-//           <Box key={comment.id} mb={2}>
-//             <Typography variant="body1">{comment.content}</Typography>
-//             <Box display="flex" justifyContent="space-between" alignItems="center">
-//               <Typography variant="subtitle2" color="textSecondary">
-//                 {comment.nickname} | {new Date(comment.createdAt).toLocaleString()}
-//               </Typography>
-//               <Button
-//                 variant="outlined"
-//                 color="error"
-//                 size="small"
-//                 onClick={() => handleDeleteComment(comment.id)}
-//               >
-//                 삭제
-//               </Button>
+//         {/* 좋아요 버튼 */}
+//         <Box display="flex" justifyContent="flex-end" mb={2}>
+//           <Button
+//             variant="contained"
+//             color={liked ? 'secondary' : 'primary'}
+//             onClick={toggleLike}
+//           >
+//             {liked ? '좋아요 취소' : '좋아요'} ({likeCount || 0})
+//           </Button>
+//         </Box>
+
+//         {/* 댓글 목록 */}
+//         <Box mt={3}>
+//           <Typography variant="h6" gutterBottom>
+//             댓글
+//           </Typography>
+//           <Divider style={{ marginBottom: '20px' }} />
+//           {comments.map((comment) => (
+//             <Box key={comment.commentId} mb={2}>
+//               <Typography variant="body1">{comment.content}</Typography>
+//               <Box display="flex" justifyContent="space-between" alignItems="center">
+//                 <Typography variant="subtitle2" color="textSecondary">
+//                   {comment.nickname} | {new Date(comment.createdAt).toLocaleString()}
+//                 </Typography>
+//               </Box>
+//               <Divider style={{ margin: '10px 0' }} />
 //             </Box>
-//             <Divider style={{ margin: '10px 0' }} />
-//           </Box>
-//         ))}
+//           ))}
+//         </Box>
+
 //         {/* 댓글 입력 */}
 //         <Box display="flex" mt={3}>
 //           <TextField
@@ -341,145 +371,9 @@ export default BoardDetail;
 //           </Button>
 //         </Box>
 //       </Paper>
-
-//       {/* 삭제 확인 Dialog */}
-//       <Dialog open={open} onClose={handleClose}>
-//         <DialogTitle>삭제 확인</DialogTitle>
-//         <DialogContent>
-//           <DialogContentText>
-//             이 게시글을 정말로 삭제하시겠습니까? 삭제된 게시글은 복구할 수 없습니다.
-//           </DialogContentText>
-//         </DialogContent>
-//         <DialogActions>
-//           <Button onClick={handleClose} color="primary">
-//             취소
-//           </Button>
-//           <Button onClick={handleDelete} color="error" variant="contained">
-//             삭제
-//           </Button>
-//         </DialogActions>
-//       </Dialog>
 //     </Container>
 //   );
 // }
 
 // export default BoardDetail;
 
-
-// import React, { useEffect, useState } from 'react';
-// import axios from 'axios';
-// import { useParams, useNavigate } from 'react-router-dom';
-// import { Typography, Container, Paper, Box, Divider, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-
-// function BoardDetail() {
-//   const { id } = useParams();
-//   const [post, setPost] = useState(null);
-//   const [open, setOpen] = useState(false); // 삭제 확인 Dialog 상태
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     fetchPost();
-//     incrementViews(); // 조회수 증가
-//   }, [id]);
-
-//   const fetchPost = async () => {
-//     try {
-//       const response = await axios.get(`http://localhost:8080/api/boards/${id}`);
-//       setPost(response.data);
-//     } catch (error) {
-//       console.error('Error fetching post:', error);
-//     }
-//   };
-
-//   const incrementViews = async () => {
-//     try {
-//       await axios.put(`http://localhost:8080/api/boards/${id}/views`);
-//     } catch (error) {
-//       console.error('Error incrementing views:', error);
-//     }
-//   };
-
-//   const incrementLikes = async () => {
-//     try {
-//       const response = await axios.put(`http://localhost:8080/api/boards/${id}/likes`);
-//       setPost((prevPost) => ({ ...prevPost, likes: response.data.likes }));
-//     } catch (error) {
-//       console.error('Error incrementing likes:', error);
-//     }
-//   };
-
-//   const handleDelete = async () => {
-//     try {
-//       await axios.delete(`http://localhost:8080/api/boards/${id}`);
-//       alert('게시글이 삭제되었습니다.');
-//       navigate('/BoardList');
-//     } catch (error) {
-//       console.error('Error deleting post:', error);
-//       alert('게시글 삭제에 실패했습니다.');
-//     }
-//   };
-
-//   const handleOpen = () => setOpen(true);
-//   const handleClose = () => setOpen(false);
-
-//   if (!post) return <Typography>게시글을 불러오는 중입니다...</Typography>;
-
-//   return (
-//     <Container maxWidth="md" style={{ padding: '20px' }}>
-//       <Paper elevation={4} style={{ padding: '30px', borderRadius: '8px' }}>
-//         <Box mb={3}>
-//           <Typography variant="h4" fontWeight="bold" gutterBottom>
-//             {post.title}
-//           </Typography>
-//           <Divider style={{ marginBottom: '20px' }} />
-//           <Box display="flex" justifyContent="space-between" alignItems="center">
-//             <Typography variant="subtitle1" color="textSecondary">
-//               작성자: {post.nickname}
-//             </Typography>
-//             <Typography variant="subtitle1" color="textSecondary">
-//               작성일: {new Date(post.createdAt).toLocaleDateString()}
-//             </Typography>
-//           </Box>
-//         </Box>
-//         <Divider style={{ margin: '20px 0' }} />
-//         <Typography variant="body1" paragraph style={{ whiteSpace: 'pre-line' }}>
-//           {post.content}
-//         </Typography>
-//         <Divider style={{ margin: '20px 0' }} />
-//         <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
-//           <Typography variant="subtitle2" color="textSecondary">
-//             조회수: {post.views} | 좋아요: {post.likes}
-//           </Typography>
-//           <Box>
-//             <Button variant="outlined" color="error" onClick={handleOpen} style={{ marginRight: '10px' }}>
-//               삭제하기
-//             </Button>
-//             <Button variant="contained" color="primary" onClick={incrementLikes}>
-//               좋아요
-//             </Button>
-//           </Box>
-//         </Box>
-//       </Paper>
-
-//       {/* 삭제 확인 Dialog */}
-//       <Dialog open={open} onClose={handleClose}>
-//         <DialogTitle>삭제 확인</DialogTitle>
-//         <DialogContent>
-//           <DialogContentText>
-//             이 게시글을 정말로 삭제하시겠습니까? 삭제된 게시글은 복구할 수 없습니다.
-//           </DialogContentText>
-//         </DialogContent>
-//         <DialogActions>
-//           <Button onClick={handleClose} color="primary">
-//             취소
-//           </Button>
-//           <Button onClick={handleDelete} color="error" variant="contained">
-//             삭제
-//           </Button>
-//         </DialogActions>
-//       </Dialog>
-//     </Container>
-//   );
-// }
-
-// export default BoardDetail;

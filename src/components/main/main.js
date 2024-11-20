@@ -139,7 +139,7 @@ const Main = () => {
         </div>
       )}
         {/* 탭 내용 */}
-      <div style={{ marginLeft: isSidebarOpen ? "260px" : "10px", padding: "20px" }}>
+      <div>
         {selectedTab === 0 && (
           <Typography variant="h5">홈 페이지 내용</Typography>
         )}

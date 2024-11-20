@@ -4,6 +4,8 @@ import { Box, Container, Typography, TextField, Button, Divider } from '@mui/mat
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import '../../css/Login.css';
+import { useDispatch } from 'react-redux';
+import { setUserId } from '../../actions/userActions';
 
 const BackgroundBox = styled(Box)({
   backgroundColor: '#000',
@@ -40,6 +42,7 @@ function Login() {
   const [fadeOut, setFadeOut] = useState(false); // 페이드 아웃 상태
   const [fadeIn, setFadeIn] = useState(true); // 페이드 인 상태
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!window.Kakao.isInitialized()) {
@@ -87,7 +90,13 @@ function Login() {
     setIsLoading(true); // 로딩 시작
     try {
       const response = await axios.post('http://localhost:8080/api/auth/login', { id, password });
-      if (response.data === "Login Successful") {
+      console.log(response.data.userId)
+      if (response.data.userId) {
+        dispatch({
+          type: 'SET_USER_ID',
+          payload: response.data.userId, // 서버에서 반환된 userId
+        });
+        
         setTimeout(() => {
           setFadeOut(true); // 페이드 아웃 시작
           setTimeout(() => navigate('/main'), 500); // 메인으로 이동
