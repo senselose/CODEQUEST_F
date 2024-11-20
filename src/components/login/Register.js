@@ -14,9 +14,13 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
 import { styled } from '@mui/system';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+
 
 const BackgroundBox = styled(Box)({
   backgroundColor: '#000',
@@ -37,25 +41,60 @@ const WhiteBox = styled(Box)({
   zIndex: 3,
   position: 'relative',
   top: '-50px',
+  alignItems: 'center',
 });
 
 function Register() {
   const [formData, setFormData] = useState({
     id: '',
     password: '',
-    confirmPassword: '', // 비밀번호 확인 필드 추가
-    name: '', // 이름 필드 추가
+    confirmPassword: '',
+    name: '',
     mail: '',
-    phone : '',
+    phone: '',
     nickName: '',
     agreeToTerms: false,
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [openPopup, setOpenPopup] = useState(false);
+
+  // 비밀번호 유효성 상태
+  const [passwordValid, setPasswordValid] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
   const navigate = useNavigate();
+
+  // 비밀번호 유효성 검사
+  const validatePassword = (password) => {
+    const minLength = /.{8,}/; // 8자 이상
+    const hasNumber = /\d/; // 숫자 포함
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/; // 특수문자 포함
+
+    if (!minLength.test(password)) {
+      setPasswordValid(false);
+      setPasswordError('비밀번호는 8자 이상이어야 합니다.');
+    } else if (!hasNumber.test(password)) {
+      setPasswordValid(false);
+      setPasswordError('비밀번호에 숫자가 하나 이상 포함되어야 합니다.');
+    } else if (!hasSpecialChar.test(password)) {
+      setPasswordValid(false);
+      setPasswordError('비밀번호에 특수문자가 하나 이상 포함되어야 합니다.');
+    } else {
+      setPasswordValid(true);
+      setPasswordError('');
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    // 비밀번호 유효성 검사
+    if (name === 'password') {
+      validatePassword(value);
+    }
+
     setFormData({
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
@@ -77,21 +116,20 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 비밀번호 확인 로직
     if (formData.password !== formData.confirmPassword) {
       alert('비밀번호가 일치하지 않습니다. 다시 확인해주세요.');
       return;
     }
 
-    // 백엔드로 보낼 데이터에서 confirmPassword 제거
-    const { id, password, name, mail, nickName } = formData;
+    const { id, password, name, mail, nickName, phone } = formData;
 
     try {
       const response = await axios.post('http://localhost:8080/api/auth/register', {
         id,
-        password, // password만 전송
+        password,
         name,
         mail,
+        phone,
         nickName,
       });
 
@@ -112,7 +150,16 @@ function Register() {
   };
 
   return (
-    <Box sx={{ backgroundColor: '#000', minHeight: '100vh', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
+    <Box
+      sx={{
+        backgroundColor: '#000',
+        minHeight: '100vh',
+        textAlign: 'center',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
       <Container sx={{ fullWidth: '100vw' }}>
         <BackgroundBox>
           <Typography variant="h4" fontWeight="bold" color="#00DFEE" sx={{ padding: '35px' }}>
@@ -121,7 +168,10 @@ function Register() {
         </BackgroundBox>
 
         <WhiteBox>
-          <form onSubmit={handleSubmit} style={{ width: '100%', marginTop: '30px' }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{ width: '100%', marginTop: '30px', alignItems: 'center' }}
+          >
             <TextField
               label="아이디"
               type="text"
@@ -134,23 +184,57 @@ function Register() {
             />
             <TextField
               label="비밀번호"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               name="password"
               value={formData.password}
               onChange={handleChange}
               fullWidth
               required
               margin="normal"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              helperText={
+                passwordError || (passwordValid ? '사용할 수 있는 비밀번호입니다.' : '')
+              }
+              error={!!passwordError}
             />
             <TextField
               label="비밀번호 확인"
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
               fullWidth
               required
               margin="normal"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              helperText={
+                formData.password &&
+                formData.confirmPassword &&
+                formData.password !== formData.confirmPassword
+                  ? '비밀번호가 일치하지 않습니다.'
+                  : ''
+              }
+              error={
+                formData.password &&
+                formData.confirmPassword &&
+                formData.password !== formData.confirmPassword
+              }
             />
             <TextField
               label="이름"
@@ -213,19 +297,25 @@ function Register() {
                   name="agreeToTerms"
                   required
                   checked={formData.agreeToTerms}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handlePopupOpen();
-                  }}
+                  onChange={handleChange}
                 />
               }
-              label="개인정보 활용에 동의합니다."
-              sx={{ mt: 2 }}
+              label="개인정보 제공에 동의하시겠습니까?"
+              sx={{
+                // mt: 1,
+                color : '#333',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'row',
+              }}
             />
+
             <Button
               type="submit"
               variant="contained"
               fullWidth
+              disabled={!passwordValid || formData.password !== formData.confirmPassword}
               sx={{
                 mt: 2,
                 backgroundColor: '#000',
@@ -236,87 +326,8 @@ function Register() {
               회원가입
             </Button>
           </form>
-
-          <Divider sx={{ mt: 3, mb: 1 }}>이미 계정이 있으신가요?</Divider>
-          <Button
-            variant="text"
-            color="inherit"
-            onClick={() => navigate('/')}
-            sx={{ fontSize: '0.9em', color: '#666' }}
-          >
-            로그인 페이지로 이동
-          </Button>
         </WhiteBox>
       </Container>
-
-      <Dialog
-        open={openPopup}
-        onClose={() => handlePopupClose(false)}
-        PaperProps={{
-          style: {
-            borderRadius: '15px',
-            maxWidth: '500px',
-            textAlign: 'center',
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            backgroundColor: '#00DFEE',
-            color: '#000',
-            fontWeight: 'bold',
-          }}
-        >
-          개인정보 수집 및 이용 동의
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            backgroundColor: '#f9f9f9',
-            color: '#333',
-            lineHeight: 1.8,
-          }}
-        >
-          <DialogContentText>
-            <strong>1. 수집하는 개인정보 항목</strong>: 이름, 이메일, 닉네임, 아이디<br />
-            <strong>2. 이용 목적</strong>: 회원관리, 서비스 제공 및 개선<br />
-            <strong>3. 보유 및 이용 기간</strong>: 회원 탈퇴 시까지. 단, 관련 법령에 따라 일정 기간 보존<br />
-            <strong>4. 제3자 제공 여부</strong>: 없음<br />
-            <strong>5. 동의 철회 방법</strong>: 회원정보 수정 페이지에서 철회 가능<br />
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions
-          sx={{
-            backgroundColor: '#f1f1f1',
-            justifyContent: 'center',
-            padding: '10px',
-          }}
-        >
-          <Button
-            onClick={() => handlePopupClose(false)}
-            variant="outlined"
-            sx={{
-              color: '#666',
-              borderColor: '#666',
-              '&:hover': { backgroundColor: '#000' },
-              marginRight: '10px',
-            }}
-          >
-            취소
-          </Button>
-          <Button
-            onClick={() => handlePopupClose(true)}
-            variant="contained"
-            sx={{
-              backgroundColor: '#00DFEE',
-              color: '#000',
-              fontWeight: 'bold',
-              '&:hover': { backgroundColor: '#00BBDD' },
-            }}
-          >
-            확인
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }
