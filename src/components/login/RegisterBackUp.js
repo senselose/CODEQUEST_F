@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Personal from "./Personal";
 import axios from 'axios';
 import {
   Box,
@@ -14,13 +15,14 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  InputAdornment,
-  IconButton,
+  InputAdornment, // 추가
+  IconButton, // 추가
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material'; // 추가
 import { styled } from '@mui/system';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
+//-----------------------------------------------------------------
 const BackgroundBox = styled(Box)({
   backgroundColor: '#000',
   paddingBottom: '10px',
@@ -40,9 +42,7 @@ const WhiteBox = styled(Box)({
   zIndex: 3,
   position: 'relative',
   top: '-50px',
-  alignItems: 'center',
 });
-
 function Register() {
   const [formData, setFormData] = useState({
     id: '',
@@ -55,18 +55,180 @@ function Register() {
     agreeToTerms: false,
   });
 
+
+  //--------------------------------------------------
+  const navigate = useNavigate();
+
+  const [openPopup, setOpenPopup] = useState(false);
+
+  // 아이디
+  const [idMessage, setIdMessage] = useState(''); // 아이디 메시지 상태
+  const [isIdValid, setIsIdValid] = useState(null); // 아이디 유효성 상태 (true/false/null)
+   // 이메일
+   const [mailMessage, setMailMessage] = useState(''); // 아이디 메시지 상태
+   const [isMailValid, setIsMailValid] = useState(null); // 아이디 유효성 상태 (true/false/null)
+    // 닉네임
+  const [nickNameMessage, setNickNameMessage] = useState(''); // 아이디 메시지 상태
+  const [isNickNameValid, setIsNickNameValid] = useState(null); // 아이디 유효성 상태 (true/false/null)
+
+  // 비밀번호 유효성 상태
+  const [passwordValid, setPasswordValid] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  // 비밀번호 토글
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [openPopup, setOpenPopup] = useState(false);
-  const navigate = useNavigate();
+
+  // 비밀번호 유효성 검사
+  const validatePassword = (password) => {
+    const minLength = /.{8,}/; // 8자 이상
+    const hasNumber = /\d/; // 숫자 포함
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/; // 특수문자 포함
+
+    if (!minLength.test(password)) {
+      setPasswordValid(false);
+      setPasswordError('비밀번호는 8자 이상이어야 합니다.');
+    } else if (!hasNumber.test(password)) {
+      setPasswordValid(false);
+      setPasswordError('비밀번호에 숫자가 하나 이상 포함되어야 합니다.');
+    } else if (!hasSpecialChar.test(password)) {
+      setPasswordValid(false);
+      setPasswordError('비밀번호에 특수문자가 하나 이상 포함되어야 합니다.');
+    } else {
+      setPasswordValid(true);
+      setPasswordError('');
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setFormData({
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
     });
+
+    if (name === 'password') {
+      validatePassword(value); // 비밀번호 유효성 검사
+    }
+
+    // 아이디 변경 시 메시지 초기화
+    if (name === 'id') {
+      setIdMessage('');
+      setIsIdValid(null);
+    }
+
+    
+    // 이메일 변경 시 메시지 초기화
+    if (name === 'mail') {
+      setMailMessage('');
+      setIsMailValid(null);
+    }
+
+    
+    // 닉네임 변경 시 메시지 초기화
+    if (name === 'nickName') {
+      setNickNameMessage('');
+      setIsNickNameValid(null);
+    }
   };
+
+
+        // 아이디 중복 확인 함수
+        const checkIdDuplicate = async () => {
+          console.log("Checking ID:", formData.id); // 디버깅 로그
+        
+          if (!formData.id) {
+            setIdMessage("아이디를 입력하세요.");
+            setIsIdValid(false);
+            return;
+          }
+        
+          try {
+            const response = await axios.get("http://localhost:8080/api/auth/checkMail", {
+              params: { mail: formData.id },
+            });
+            console.log("Axios 응답:", response.data); // 응답 디버깅
+            if (response.data) {
+              setIdMessage("사용할 수 있는 아이디 입니다.");
+              setIsMailValid(true);
+              // 서버에서 true = 이미 사용 중인 아이디
+
+            } else {
+              // 서버에서 false = 사용 가능한 아이디
+              setIdMessage("사용할 수 없는 아이디 입니다.");
+              setIsIdValid(false);
+            }
+          } catch (error) {
+            console.error("아이디 중복 확인 오류:", error);
+            setMailMessage("아이디 중복 확인 중 문제가 발생했습니다.");
+            setIsMailValid(false);
+          }
+        };
+
+        // 메일 중복 확인 함수
+        const checkMailDuplicate = async () => {
+          console.log("Checking Mail:", formData.mail); // 디버깅 로그
+        
+          if (!formData.mail) {
+            setMailMessage("이메일을 입력하세요.");
+            setIsMailValid(false);
+            return;
+          }
+        
+          try {
+            const response = await axios.get("http://localhost:8080/api/auth/checkMail", {
+              params: { mail: formData.mail },
+            });
+            console.log("Axios 응답:", response.data); // 응답 디버깅
+            if (response.data) {
+              setMailMessage("사용할 수 있는 이메일입니다.");
+              setIsMailValid(true);
+              // 서버에서 true = 이미 사용 중인 아이디
+    
+            } else {
+              // 서버에서 false = 사용 가능한 아이디
+              setMailMessage("이미 가입이 되어 있는 이메일 입니다.");
+              setIsMailValid(false);
+            }
+          } catch (error) {
+            console.error("이메일 중복 확인 오류:", error);
+            setMailMessage("이메일 중복 확인 중 문제가 발생했습니다.");
+            setIsMailValid(false);
+          }
+        };
+          
+        // 닉네임 중복 확인 함수
+        const checkNickNameDuplicate = async () => {
+          console.log("Checking nickName:", formData.nickName); // 디버깅 로그
+        
+          if (!formData.nickName) {
+            setNickNameMessage("닉네임을 입력하세요.");
+            setIsNickNameValid(false);
+            return;
+          }
+        
+          try {
+            const response = await axios.get("http://localhost:8080/api/auth/checkNickname", {
+              params: { nickName: formData.nickName },
+            });
+            console.log("Axios 응답:", response.data); // 응답 디버깅
+            if (response.data) {
+              setNickNameMessage("사용할 수 있는 닉네임입니다.");
+              setIsNickNameValid(true);
+              // 서버에서 true = 이미 사용 중인 아이디
+    
+            } else {
+              // 서버에서 false = 사용 가능한 아이디
+              setNickNameMessage("이미 사용 중인 닉네임 입니다..");
+              setIsNickNameValid(false);
+            }
+          } catch (error) {
+            console.error("닉네임 중복 확인 오류:", error);
+            setNickNameMessage("닉네임 중복 확인 중 문제가 발생했습니다.");
+            setIsNickNameValid(false);
+          }
+        };
+
 
   const handlePopupOpen = () => {
     setOpenPopup(true);
@@ -82,11 +244,12 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (formData.password !== formData.confirmPassword) {
       alert('비밀번호가 일치하지 않습니다. 다시 확인해주세요.');
       return;
     }
+
 
     const { id, password, name, mail, nickName, phone } = formData;
 
@@ -96,8 +259,8 @@ function Register() {
         password,
         name,
         mail,
-        phone,
         nickName,
+        phone,
       });
 
       if (response.status === 200) {
@@ -145,10 +308,14 @@ function Register() {
               name="id"
               value={formData.id}
               onChange={handleChange}
+              onBlur={checkIdDuplicate} // 입력 필드가 포커스를 잃을 때 중복 확인
               fullWidth
               required
               margin="normal"
+              error={isIdValid === false} // 중복된 아이디일 경우 에러 표시
+              helperText={idMessage} // 메시지 표시
             />
+
             <TextField
               label="비밀번호"
               type={showPassword ? 'text' : 'password'}
@@ -167,6 +334,10 @@ function Register() {
                   </InputAdornment>
                 ),
               }}
+              helperText={
+                passwordError || (passwordValid ? '사용할 수 있는 비밀번호입니다.' : '')
+              }
+              error={!!passwordError}
             />
             <TextField
               label="비밀번호 확인"
@@ -186,7 +357,20 @@ function Register() {
                   </InputAdornment>
                 ),
               }}
+              helperText={
+                formData.password &&
+                formData.confirmPassword &&
+                formData.password !== formData.confirmPassword
+                  ? '비밀번호가 일치하지 않습니다.'
+                  : passwordError || (passwordValid ? '비밀번호가 일치합니다.' : '')
+              }
+              error={
+                formData.password &&
+                formData.confirmPassword &&
+                formData.password !== formData.confirmPassword
+              }
             />
+
             <TextField
               label="이름"
               type="text"
@@ -209,13 +393,16 @@ function Register() {
             />
             <TextField
               label="이메일"
-              type="email"
+              type="text"
               name="mail"
               value={formData.mail}
               onChange={handleChange}
+              onBlur={checkMailDuplicate} // 입력 필드가 포커스를 잃을 때 중복 확인
               fullWidth
               required
               margin="normal"
+              error={isMailValid === false} // 중복된 아이디일 경우 에러 표시
+              helperText={mailMessage} // 메시지 표시
             />
             <TextField
               label="닉네임"
@@ -223,9 +410,12 @@ function Register() {
               name="nickName"
               value={formData.nickName}
               onChange={handleChange}
+              onBlur={checkNickNameDuplicate} // 입력 필드가 포커스를 잃을 때 중복 확인
               fullWidth
               required
               margin="normal"
+              error={isNickNameValid === false} // 중복된 아이디일 경우 에러 표시
+              helperText={nickNameMessage} // 메시지 표시
             />
             <Button
               variant="contained"
@@ -273,11 +463,11 @@ function Register() {
               }}
             />
 
-
             <Button
               type="submit"
               variant="contained"
               fullWidth
+              disabled={!passwordValid || formData.password !== formData.confirmPassword}
               sx={{
                 mt: 2,
                 backgroundColor: '#000',
@@ -289,18 +479,17 @@ function Register() {
             </Button>
           </form>
 
-          <Divider sx={{ mt: 3, mb: 1, color : "#000" }}>이미 계정이 있으신가요?</Divider>
+          <Divider sx={{ mt: 3, mb: 1, color: '#333' }}>이미 계정이 있으신가요?</Divider>
           <Button
-            variant="text"
-            color="inherit"
-            onClick={() => navigate('/')}
-            sx={{ fontSize: '0.9em', color: '#666' }}
-          >
-            로그인 페이지로 이동
-          </Button>
+          variant="text"
+          onClick={() => navigate('/')}
+          sx={{ fontSize: '0.9em', color: '#333' }}
+        >
+          로그인 페이지로 이동
+        </Button>
+
         </WhiteBox>
       </Container>
-
       <Dialog
         open={openPopup}
         onClose={() => handlePopupClose(false)}

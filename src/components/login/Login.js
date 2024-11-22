@@ -159,7 +159,7 @@ function Login() {
                   type="submit"
                   variant="contained"
                   fullWidth
-                  sx={{ mt: 2, backgroundColor: '#000', color: '#000', '&:hover': { backgroundColor: '#333' } }}
+                  sx={{ mt: 2, backgroundColor: '#000', color: '#fff', '&:hover': { backgroundColor: '#333' } }}
                 >
                   Sign In
                 </Button>
