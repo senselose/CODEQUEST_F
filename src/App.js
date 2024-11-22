@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Login from './components/login/Login';
 import Board from './components/board/Board';
 import BoardForm from './components/board/BoardForm';
@@ -10,6 +11,7 @@ import Main from './components/main/main';
 
 import { Provider } from "react-redux";
 import store from "./reducers/store"; // store.js 경로에 맞게 수정
+import FloatingButton from './components/floatingButton/FloatingButton';
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
           <Route path="/board/:id" element={<BoardDetail />} /> {/* 게시글 상세 페이지 경로 추가 */}
           <Route path="/register" element={<Register />} />        
         </Routes>
+        <FloatingButton />
       </Router>
     </Provider>
     
