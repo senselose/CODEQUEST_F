@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Personal from "./Personal";
 import axios from 'axios';
 import {
   Box,
@@ -20,7 +21,6 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material'; // 추가
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
-import CheckPersonal from './CheckPersonal';
 
 //-----------------------------------------------------------------
 const BackgroundBox = styled(Box)({
@@ -58,18 +58,6 @@ function Register() {
 
   //--------------------------------------------------
   const navigate = useNavigate();
-
-  // 모달창
-  const [openCheckPersonalModal, setOpenCheckPersonalModal] = useState(false);
-  const handleOpenCheckPersonalModal = () => {
-    setOpenCheckPersonalModal(true);
-  };
-
-  const handleCloseCheckPersonalModal = () => {
-    setOpenCheckPersonalModal(false);
-  };
-
-
 
   const [openPopup, setOpenPopup] = useState(false);
 
@@ -243,14 +231,14 @@ function Register() {
 
 
   const handlePopupOpen = () => {
-    setOpenPopup(true); // CheckPersonal 모달 열기
+    setOpenPopup(true);
   };
 
   const handlePopupClose = (agree) => {
-    setOpenPopup(false); // CheckPersonal 모달 닫기
+    setOpenPopup(false);
     setFormData((prevData) => ({
       ...prevData,
-      agreeToTerms: agree, // 동의 여부를 폼 데이터에 저장
+      agreeToTerms: agree,
     }));
   };
 
@@ -262,10 +250,6 @@ function Register() {
       return;
     }
 
-    if (!formData.agreeToTerms) {
-      alert("개인정보 제공에 동의해야 회원가입이 가능합니다.");
-      return;
-    }
 
     const { id, password, name, mail, nickName, phone } = formData;
 
@@ -448,21 +432,36 @@ function Register() {
             >
               핸드폰 인증
             </Button>
-           {/* 개인정보 동의 */}
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="agreeToTerms"
-                checked={formData.agreeToTerms}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlePopupOpen(); // 모달 열기
-                
-                }}
-              />
-            }
-            label="개인정보 제공에 동의하시겠습니까?"
-          />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="agreeToTerms"
+                  required
+                  checked={formData.agreeToTerms}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePopupOpen();
+                  }}
+                />
+              }
+              label={
+                <Typography component="span" sx={{ color: '#333', display: 'inline' }}>
+                  개인정보 제공에 동의하시겠습니까?
+                  <Typography
+                    component="span"
+                    sx={{ color: 'red', display: 'inline', marginLeft: '4px' }}
+                  >
+                  </Typography>
+                </Typography>
+              }
+              sx={{
+                mt: 2,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'row',
+              }}
+            />
 
             <Button
               type="submit"
@@ -491,7 +490,7 @@ function Register() {
 
         </WhiteBox>
       </Container>
-      {/* <Dialog
+      <Dialog
         open={openPopup}
         onClose={() => handlePopupClose(false)}
         PaperProps={{
@@ -559,8 +558,7 @@ function Register() {
             확인
           </Button>
         </DialogActions>
-      </Dialog> */}
-            <CheckPersonal open={openPopup} onClose={handlePopupClose} />
+      </Dialog>
     </Box>
   );
 }

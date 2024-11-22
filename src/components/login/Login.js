@@ -21,7 +21,7 @@ const WhiteBox = styled(Box)({
   borderTopLeftRadius: '100px',
   padding: '20px',
   maxWidth: '100%',
-  zIndex: 2,
+  zIndex: 1,
   position: 'relative',
 });
 
@@ -30,7 +30,7 @@ const OverlappingImage = styled(Box)({
   top: '-100px',
   right: '130px',
   transform: 'translate(50%, 0)',
-  zIndex: 1,
+  zIndex: 4,
   width: '200px',
   height: 'auto',
 });
@@ -120,7 +120,7 @@ function Login() {
           <img src="/logo.png" alt="Loading..." className="loading-logo" />
         </div>
       ) : (
-        <Box sx={{ backgroundColor: '#000', minHeight: '100vh', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
+        <Box sx={{ backgroundColor: '#000', minHeight: '100%', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
           <Container sx={{ fullWidth: '100%', paddingTop: '40px' }}>
             <BackgroundBox>
               <Container sx={{ width: '100%', px: 6, pt: 7 }}>
@@ -133,7 +133,7 @@ function Login() {
 
             <WhiteBox sx={{ marginTop: '70px' }}>
               <OverlappingImage component="img" src="/fireboyreal.png" alt="Logo" />
-              <Typography variant="h5" fontWeight="bold" align="center" sx={{ mb: 6, paddingTop: '40px' }}>
+              <Typography variant="h5" fontWeight="bold" align="center" sx={{ mb: 2, paddingTop: '20px',  color: '#000'}}>
                 LOGIN
               </Typography>
               <form onSubmit={handleLogin}>
@@ -168,11 +168,14 @@ function Login() {
                 <Button variant="text" color="inherit" size="small">
                   비밀번호 재설정
                 </Button>
+                <Button variant="text" color="inherit" size="small">
+                  아이디 찾기
+                </Button>
                 <Button variant="text" color="inherit" size="small" onClick={() => navigate('/Register')}>
                   회원가입
                 </Button>
               </Box>
-              <Divider sx={{ mt: 3, mb: 1 }}>SNS 계정으로 이용하기</Divider>
+              <Divider sx={{ mt: 1,  color: '#000', mb: 1 }}>SNS 계정으로 이용하기</Divider>
               <Box display="flex" justifyContent="center" mt={1}>
                 <Button
                   variant="contained"

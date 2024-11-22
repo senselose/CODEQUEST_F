@@ -243,14 +243,14 @@ function Register() {
 
 
   const handlePopupOpen = () => {
-    setOpenPopup(true); // CheckPersonal 모달 열기
+    setOpenPopup(true);
   };
 
   const handlePopupClose = (agree) => {
-    setOpenPopup(false); // CheckPersonal 모달 닫기
+    setOpenPopup(false);
     setFormData((prevData) => ({
       ...prevData,
-      agreeToTerms: agree, // 동의 여부를 폼 데이터에 저장
+      agreeToTerms: agree,
     }));
   };
 
@@ -262,10 +262,6 @@ function Register() {
       return;
     }
 
-    if (!formData.agreeToTerms) {
-      alert("개인정보 제공에 동의해야 회원가입이 가능합니다.");
-      return;
-    }
 
     const { id, password, name, mail, nickName, phone } = formData;
 
@@ -448,21 +444,36 @@ function Register() {
             >
               핸드폰 인증
             </Button>
-           {/* 개인정보 동의 */}
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="agreeToTerms"
-                checked={formData.agreeToTerms}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlePopupOpen(); // 모달 열기
-                
-                }}
-              />
-            }
-            label="개인정보 제공에 동의하시겠습니까?"
-          />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  name="agreeToTerms"
+                  required
+                  checked={formData.agreeToTerms}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePopupOpen();
+                  }}
+                />
+              }
+              label={
+                <Typography component="span" sx={{ color: '#333', display: 'inline' }}>
+                  개인정보 제공에 동의하시겠습니까?
+                  <Typography
+                    component="span"
+                    sx={{ color: 'red', display: 'inline', marginLeft: '4px' }}
+                  >
+                  </Typography>
+                </Typography>
+              }
+              sx={{
+                mt: 2,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'row',
+              }}
+            />
 
             <Button
               type="submit"
@@ -491,76 +502,77 @@ function Register() {
 
         </WhiteBox>
       </Container>
-      {/* <Dialog
-        open={openPopup}
-        onClose={() => handlePopupClose(false)}
-        PaperProps={{
-          style: {
-            borderRadius: '15px',
-            maxWidth: '500px',
-            textAlign: 'center',
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            backgroundColor: '#00DFEE',
-            color: '#333',
-            fontWeight: 'bold',
-          }}
-        >
-          개인정보 수집 및 이용 동의
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            backgroundColor: '#f9f9f9',
-            color: '#333',
-            lineHeight: 1.8,
-          }}
-        >
-          <DialogContentText>
-            <br/>
-            <strong>1. 수집하는 개인정보 항목</strong>: 이름, 이메일, 닉네임, 아이디<br />
-            <strong>2. 이용 목적</strong>: 회원관리, 서비스 제공 및 개선<br />
-            <strong>3. 보유 및 이용 기간</strong>: 회원 탈퇴 시까지. 단, 관련 법령에 따라 일정 기간 보존<br />
-            <strong>4. 제3자 제공 여부</strong>: 없음<br />
-            <strong>5. 동의 철회 방법</strong>: 회원정보 수정 페이지에서 철회 가능<br />
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions
-          sx={{
-            backgroundColor: '#f1f1f1',
-            justifyContent: 'center',
-            padding: '10px',
-          }}
-        >
-          <Button
-            onClick={() => handlePopupClose(false)}
-            variant="outlined"
-            sx={{
-              color: '#666',
-              borderColor: '#666',
-              '&:hover': { backgroundColor: '#000' },
-              marginRight: '10px',
-            }}
-          >
-            취소
-          </Button>
-          <Button
-            onClick={() => handlePopupClose(true)}
-            variant="contained"
-            sx={{
-              backgroundColor: '#00DFEE',
-              color: '#000',
-              fontWeight: 'bold',
-              '&:hover': { backgroundColor: '#00BBDD' },
-            }}
-          >
-            확인
-          </Button>
-        </DialogActions>
-      </Dialog> */}
-            <CheckPersonal open={openPopup} onClose={handlePopupClose} />
+      <Dialog> 
+        <CheckPersonal/>
+      {/* </Dialog> */}
+      //   open={openPopup}
+      //   onClose={() => handlePopupClose(false)}
+      //   PaperProps={{
+      //     style: {
+      //       borderRadius: '15px',
+      //       maxWidth: '500px',
+      //       textAlign: 'center',
+      //     },
+      //   }}
+      // >
+      //   <DialogTitle
+      //     sx={{
+      //       backgroundColor: '#00DFEE',
+      //       color: '#333',
+      //       fontWeight: 'bold',
+      //     }}
+      //   >
+      //     개인정보 수집 및 이용 동의
+      //   </DialogTitle>
+      //   <DialogContent
+      //     sx={{
+      //       backgroundColor: '#f9f9f9',
+      //       color: '#333',
+      //       lineHeight: 1.8,
+      //     }}
+      //   >
+      //     <DialogContentText>
+      //       <br/>
+      //       <strong>1. 수집하는 개인정보 항목</strong>: 이름, 이메일, 닉네임, 아이디<br />
+      //       <strong>2. 이용 목적</strong>: 회원관리, 서비스 제공 및 개선<br />
+      //       <strong>3. 보유 및 이용 기간</strong>: 회원 탈퇴 시까지. 단, 관련 법령에 따라 일정 기간 보존<br />
+      //       <strong>4. 제3자 제공 여부</strong>: 없음<br />
+      //       <strong>5. 동의 철회 방법</strong>: 회원정보 수정 페이지에서 철회 가능<br />
+      //     </DialogContentText>
+      //   </DialogContent>
+      //   <DialogActions
+      //     sx={{
+      //       backgroundColor: '#f1f1f1',
+      //       justifyContent: 'center',
+      //       padding: '10px',
+      //     }}
+      //   >
+      //     <Button
+      //       onClick={() => handlePopupClose(false)}
+      //       variant="outlined"
+      //       sx={{
+      //         color: '#666',
+      //         borderColor: '#666',
+      //         '&:hover': { backgroundColor: '#000' },
+      //         marginRight: '10px',
+      //       }}
+      //     >
+      //       취소
+      //     </Button>
+      //     <Button
+      //       onClick={() => handlePopupClose(true)}
+      //       variant="contained"
+      //       sx={{
+      //         backgroundColor: '#00DFEE',
+      //         color: '#000',
+      //         fontWeight: 'bold',
+      //         '&:hover': { backgroundColor: '#00BBDD' },
+      //       }}
+      //     >
+      //       확인
+      //     </Button>
+      //   </DialogActions>
+      </Dialog>
     </Box>
   );
 }

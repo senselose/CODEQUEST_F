@@ -53,8 +53,17 @@
 }
 
 
+
+@font-face {
+  font-family: 'NanumSquareRoundR';
+  src: url('./fonts/NanumSquareRoundR.ttf') format('truetype');  font-weight: normal;
+  font-style: normal;
+}
+
+
 body {
   /* font-family: 'Dovemayo_gothic', sans-serif; */
-  font-family: 'insungit_Regular', sans-serif;
+  /* font-family: 'insungit_Regular', sans-serif; */
+  font-family: 'NanumSquareRoundR', sans-serif;
 
 }
