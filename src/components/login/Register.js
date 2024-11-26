@@ -298,6 +298,8 @@ function Register() {
     alert('핸드폰 본인 인증 절차를 진행합니다.');
   };
 
+
+
   return (
     <Box
       sx={{
@@ -464,7 +466,11 @@ function Register() {
                 }}
               />
             }
-            label="개인정보 제공에 동의하시겠습니까?"
+            label={
+              <Typography style={{ color: "black" }}>
+              개인정보 제공에 동의하시겠습니까?
+            </Typography>
+            }
           />
 
             <Button

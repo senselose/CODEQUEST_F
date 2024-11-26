@@ -9,26 +9,38 @@ import {
   FormControlLabel,
   Typography,
 } from "@mui/material";
+import termsData from './termsData.json';
 
 const CheckPersonal = ({ open, onClose }) => {
   const [selectedOptions, setSelectedOptions] = useState({
-    agreeAge: false,
-    agreeTerms: false,
-    agreeFinance: false,
+    agreeAll: false,
+    agreeService: false,
     agreePrivacy: false,
-    agreeThirdParty: false,
     agreeMarketing: false,
-    agreeAd: false,
-    agreeEmail: false,
-    agreeSms: false,
-    agreePush: false,
   });
-
   const [detailsOpen, setDetailsOpen] = useState(null);
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
-    setSelectedOptions((prev) => ({ ...prev, [name]: checked }));
+
+    if (name === "agreeAll") {
+      setSelectedOptions((prev) => {
+        const updatedOptions = Object.fromEntries(
+          Object.keys(prev).map((key) => [key, checked])
+        );
+        return updatedOptions;
+      });
+    } else {
+      setSelectedOptions((prev) => {
+        const updatedOptions = { ...prev, [name]: checked };
+
+        const allChecked = Object.keys(updatedOptions)
+          .filter((key) => key !== "agreeAll")
+          .every((key) => updatedOptions[key]);
+
+        return { ...updatedOptions, agreeAll: allChecked };
+      });
+    }
   };
 
   const openDetails = (key) => {
@@ -36,7 +48,20 @@ const CheckPersonal = ({ open, onClose }) => {
   };
 
   const closeDetails = () => {
+    if (detailsOpen) {
+      // 약관 다이얼로그를 닫을 때 자동으로 체크박스를 체크
+      setSelectedOptions((prev) => ({
+        ...prev,
+        [`agree${detailsOpen}`]: true,
+      }));
+    }
     setDetailsOpen(null);
+  };
+
+
+  const getDetailContent = (key) => {
+    const term = termsData.terms.find((term) => term.id === key);
+    return term ? term.content : "약관 내용을 찾을 수 없습니다.";
   };
 
   return (
@@ -47,46 +72,31 @@ const CheckPersonal = ({ open, onClose }) => {
           <FormControlLabel
             control={
               <Checkbox
-                name="agreeAge"
-                checked={selectedOptions.agreeAge}
+                name="agreeAll"
+                checked={selectedOptions.agreeAll}
                 onChange={handleCheckboxChange}
               />
             }
-            label={
-              <Button onClick={() => openDetails("age")} variant="text" size="small">
-                [필수] 만 14세 이상입니다
-              </Button>
-            }
+            label="모두 동의"
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="agreeTerms"
-                checked={selectedOptions.agreeTerms}
-                onChange={handleCheckboxChange}
-              />
-            }
-            label={
-              <Button onClick={() => openDetails("terms")} variant="text" size="small">
-                [필수] 쿠팡 이용약관 동의
-              </Button>
-            }
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                name="agreeFinance"
-                checked={selectedOptions.agreeFinance}
-                onChange={handleCheckboxChange}
-              />
-            }
-            label={
-              <Button onClick={() => openDetails("finance")} variant="text" size="small">
-                [필수] 전자금융거래 이용약관 동의
-              </Button>
-            }
-          />
-          {/* 추가 항목들 */}
+          <br />
+          {termsData.terms.map((term) => (
+            <FormControlLabel
+              key={term.id}
+              control={
+                <Checkbox
+                  name={`agree${term.id}`}
+                  checked={selectedOptions[`agree${term.id}`]}
+                  onChange={handleCheckboxChange}
+                />
+              }
+              label={
+                <Button onClick={() => openDetails(term.id)} variant="text" size="small">
+                  {term.title}
+                </Button>
+              } 
+            />
+          ))}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => onClose(false)} color="secondary">
@@ -94,10 +104,10 @@ const CheckPersonal = ({ open, onClose }) => {
           </Button>
           <Button
             onClick={() => {
-              const allRequiredChecked =
-                selectedOptions.agreeAge &&
-                selectedOptions.agreeTerms &&
-                selectedOptions.agreeFinance;
+              const allRequiredChecked = termsData.terms
+                .filter((term) => term.required)
+                .every((term) => selectedOptions[`agree${term.id}`]);
+
               if (!allRequiredChecked) {
                 alert("필수 항목을 모두 선택해주세요.");
                 return;
@@ -113,16 +123,10 @@ const CheckPersonal = ({ open, onClose }) => {
 
       <Dialog open={!!detailsOpen} onClose={closeDetails}>
         <DialogTitle>
-          {detailsOpen === "age" && "만 14세 이상입니다"}
-          {detailsOpen === "terms" && "쿠팡 이용약관"}
-          {detailsOpen === "finance" && "전자금융거래 이용약관"}
+          {detailsOpen && termsData.terms.find((term) => term.id === detailsOpen)?.title}
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body2">
-            {detailsOpen === "age" && "서비스를 이용하기 위해 만 14세 이상임을 확인합니다."}
-            {detailsOpen === "terms" && "쿠팡 이용약관 내용..."}
-            {detailsOpen === "finance" && "전자금융거래 이용약관 내용..."}
-          </Typography>
+          <Typography variant="body2">{getDetailContent(detailsOpen)}</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={closeDetails} color="primary">
