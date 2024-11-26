@@ -19,7 +19,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/board" element={<Board />} />
+          {/* <Route path="/board" element={<Board />} /> */}
           <Route path="/create" element={<BoardForm />} />
           <Route path="/main" element={<Main />} />
           <Route path="/BoardList" element={<BoardList />} /> {/* 오타 수정 */}
