@@ -36,14 +36,13 @@ function BoardDetail() {
     fetchLikeStatus(); // 좋아요 상태 가져오기
     fetchCommentLikeStatus();
   }, [id]);
-  
 
   const handleAddReply = async (commentId) => {
     if (!newReply[commentId]?.trim()) {
       alert("대댓글 내용을 입력해주세요.");
       return;
     }
-  
+
     try {
       const response = await axios.post(
         `http://localhost:8080/api/comments/${commentId}/reply`,
@@ -57,10 +56,10 @@ function BoardDetail() {
           },
         }
       );
-  
+
       // 새로운 대댓글 데이터를 가져옴
       const newReplyData = response.data;
-  
+
       // 댓글 상태 업데이트
       setComments((prevComments) => {
         return prevComments.map((comment) => {
@@ -76,7 +75,7 @@ function BoardDetail() {
           }
         });
       });
-  
+
       // 입력 필드 초기화
       setNewReply((prev) => ({ ...prev, [commentId]: "" }));
     } catch (error) {
@@ -84,11 +83,13 @@ function BoardDetail() {
       alert("대댓글 작성에 실패했습니다.");
     }
   };
-  
+
   // 게시글 데이터 가져오기
   const fetchPost = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/boards/${id}`);
+      const response = await axios.get(
+        `http://localhost:8080/api/boards/${id}`
+      );
       const postData = response.data;
 
       setPost(postData);
@@ -105,21 +106,39 @@ function BoardDetail() {
         `http://localhost:8080/api/comments/board/${id}`,
         { params: { userId } }
       );
-  
-      console.log("댓글 API 응답 데이터:", response.data);
-  
+
+      const rawComments = response.data;
+
+      console.log("Raw comments:", JSON.stringify(rawComments, null, 2));
+
+      // 중복 제거 및 부모-자식 관계 구성
+      const structuredComments = rawComments.filter(
+        (comment) =>
+          !rawComments.some((parent) =>
+            parent.childComments.some(
+              (child) => child.commentId === comment.commentId
+            )
+          )
+      );
+
+      // 좋아요 상태 추가
       const commentsWithLikeStatus = await Promise.all(
-        response.data.map(async (comment) => {
-            const likeStatus = await fetchCommentLikeStatus(comment.commentId);
-            return {
+        structuredComments.map(async (comment) => {
+          const likeStatus = await fetchCommentLikeStatus(comment.commentId);
+          return {
             ...comment,
             liked: likeStatus.liked,
             likeCount: likeStatus.likeCount,
           };
         })
       );
-  
+
       setComments(commentsWithLikeStatus);
+
+      console.log(
+        "Structured comments with like status:",
+        commentsWithLikeStatus
+      );
     } catch (error) {
       console.error("댓글 데이터를 가져오는 중 오류:", error);
     }
@@ -179,34 +198,31 @@ function BoardDetail() {
     }
   };
 
-
-  
   // 댓글 좋아요 토글
   const toggleCommentLike = async (commentId) => {
     console.log("댓글 좋아요 클릭:", commentId);
-  
+
     if (!userId) {
       alert("로그인 후 이용 가능합니다.");
       return;
     }
-  
+
     try {
       setLoadingCommentId(commentId); // 로딩 시작
-  
+
       // 좋아요 토글 API 요청 (수정된 부분)
       const response = await axios.post(
         `http://localhost:8080/api/comments/${commentId}/like`,
         {
-            userId, // 이제 userId를 요청 바디로 전달합니다.
+          userId, // 이제 userId를 요청 바디로 전달합니다.
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
           },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
+        }
       );
-  
-  
+
       const { isLiked, likeCount } = response.data; // 서버 응답에서 상태를 가져옴
       console.log("토글된 좋아요 상태:", response.data);
       // UI 상태 업데이트
@@ -218,19 +234,19 @@ function BoardDetail() {
         )
       );
     } catch (error) {
-        console.error("댓글 좋아요 처리 중 오류:", error);
-        if (error.response) {
-          console.error("서버 응답 데이터:", error.response.data);
-          console.error("서버 응답 상태 코드:", error.response.status);
-        } else if (error.request) {
-          console.error("서버 응답이 없습니다. 요청 데이터:", error.request);
-        } else {
-          console.error("요청 오류:", error.message);
-        }
-        alert("좋아요 처리 중 문제가 발생했습니다.");
-      } finally {
-        setLoadingCommentId(null); // 로딩 완료
+      console.error("댓글 좋아요 처리 중 오류:", error);
+      if (error.response) {
+        console.error("서버 응답 데이터:", error.response.data);
+        console.error("서버 응답 상태 코드:", error.response.status);
+      } else if (error.request) {
+        console.error("서버 응답이 없습니다. 요청 데이터:", error.request);
+      } else {
+        console.error("요청 오류:", error.message);
       }
+      alert("좋아요 처리 중 문제가 발생했습니다.");
+    } finally {
+      setLoadingCommentId(null); // 로딩 완료
+    }
   };
 
   // 댓글 추가
@@ -258,22 +274,22 @@ function BoardDetail() {
       alert("댓글 작성에 실패했습니다.");
     }
   };
-    // 댓글 좋아요 상태 가져오기
+  // 댓글 좋아요 상태 가져오기
   const fetchCommentLikeStatus = async (commentId) => {
     if (!commentId) {
       console.error("댓글 ID(commentId)가 누락되었습니다.");
       return { liked: false, likeCount: 0 };
     }
-  
+
     if (!userId) {
       console.warn("사용자 ID(userId)가 누락되었습니다.");
       return { liked: false, likeCount: 0 };
     }
-  
+
     try {
       console.log("Fetching like status for commentId:", commentId);
       console.log("With userId:", userId);
-  
+
       const response = await axios.get(
         `http://localhost:8080/api/comments/${commentId}/like-status`,
         {
@@ -282,13 +298,13 @@ function BoardDetail() {
       );
       const { isLiked, likeCount } = response.data;
 
-    // 데이터를 로깅하여 응답 확인 (디버깅 목적)
-        console.log("Received like status:", response.data);
+      // 데이터를 로깅하여 응답 확인 (디버깅 목적)
+      console.log("Received like status:", response.data);
 
-        return {
+      return {
         liked: typeof isLiked !== "undefined" ? isLiked : false,
         likeCount: typeof likeCount !== "undefined" ? likeCount : 0,
-        };
+      };
     } catch (error) {
       console.error("댓글 좋아요 상태를 가져오는 중 오류:", error);
       return { liked: false, likeCount: 0 };
@@ -305,7 +321,7 @@ function BoardDetail() {
     if (!comments || comments.length === 0) {
       return null;
     }
-  
+
     return comments.map((comment) => (
       <Box key={comment.commentId} mb={2}>
         {/* 부모 댓글 */}
@@ -331,34 +347,36 @@ function BoardDetail() {
             </Typography>
           </Box>
         </Box>
-  
+
         {/* 대댓글 렌더링 */}
-        {comment.childComments && Array.isArray(comment.childComments) && comment.childComments.length > 0 && (
-          <Box mt={2} pl={4} style={{ borderLeft: "2px solid #ddd" }}>
-            {comment.childComments.map((reply) => (
-              <Box
-                key={reply.commentId}
-                mb={2}
-                style={{
-                  backgroundColor: "#f9f9f9",
-                  padding: "10px",
-                  borderRadius: "5px",
-                }}
-              >
-                <Typography variant="body2" fontWeight="bold" color="primary">
-                  {reply.nickname}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {new Date(reply.createdAt).toLocaleString()}
-                </Typography>
-                <Typography variant="body2" style={{ marginTop: "5px" }}>
-                  {reply.content}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-        )}
-  
+        {comment.childComments &&
+          Array.isArray(comment.childComments) &&
+          comment.childComments.length > 0 && (
+            <Box mt={2} pl={4} style={{ borderLeft: "2px solid #ddd" }}>
+              {comment.childComments.map((reply) => (
+                <Box
+                  key={reply.commentId}
+                  mb={2}
+                  style={{
+                    backgroundColor: "#f9f9f9",
+                    padding: "10px",
+                    borderRadius: "5px",
+                  }}
+                >
+                  <Typography variant="body2" fontWeight="bold" color="primary">
+                    {reply.nickname}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {new Date(reply.createdAt).toLocaleString()}
+                  </Typography>
+                  <Typography variant="body2" style={{ marginTop: "5px" }}>
+                    {reply.content}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+
         {/* 대댓글 입력 */}
         <Box mt={2}>
           <TextField
@@ -385,7 +403,7 @@ function BoardDetail() {
       </Box>
     ));
   };
-  
+
   // JSX 렌더링 부분
   return (
     <Container maxWidth="md" style={{ padding: "20px" }}>
@@ -395,7 +413,11 @@ function BoardDetail() {
             {post.title}
           </Typography>
           <Divider style={{ marginBottom: "20px" }} />
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Typography variant="subtitle1" color="textSecondary">
               작성자: {post.nickname}
             </Typography>
@@ -404,20 +426,29 @@ function BoardDetail() {
             </Typography>
           </Box>
         </Box>
-  
+
         {/* 태그 표시 */}
         <Box mb={3} display="flex" gap={1} flexWrap="wrap">
           {tags.map((tag, index) => (
-            <Chip key={index} label={`#${tag}`} variant="outlined" color="primary" />
+            <Chip
+              key={index}
+              label={`#${tag}`}
+              variant="outlined"
+              color="primary"
+            />
           ))}
         </Box>
-  
+
         <Divider style={{ margin: "20px 0" }} />
-        <Typography variant="body1" paragraph style={{ whiteSpace: "pre-line" }}>
+        <Typography
+          variant="body1"
+          paragraph
+          style={{ whiteSpace: "pre-line" }}
+        >
           {post.content}
         </Typography>
         <Divider style={{ margin: "20px 0" }} />
-  
+
         {/* 좋아요 버튼 */}
         <Box display="flex" justifyContent="flex-end" mb={2}>
           <Button
@@ -428,7 +459,7 @@ function BoardDetail() {
             {liked ? "좋아요 취소" : "좋아요"} ({likeCount || 0})
           </Button>
         </Box>
-  
+
         {/* 댓글 목록 */}
         <Box mt={3}>
           <Typography variant="h6" gutterBottom>
@@ -437,7 +468,7 @@ function BoardDetail() {
           <Divider style={{ marginBottom: "20px" }} />
           {renderComments(comments)}
         </Box>
-  
+
         {/* 댓글 입력 */}
         <Box display="flex" mt={3}>
           <TextField
@@ -462,4 +493,3 @@ function BoardDetail() {
 }
 
 export default BoardDetail;
-
