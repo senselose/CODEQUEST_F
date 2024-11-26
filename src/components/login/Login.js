@@ -265,15 +265,14 @@ function Login() {
     e.preventDefault();
     setIsLoading(true); // 로딩 시작
     try {
-    //   const response = await axios.post('http://localhost:8080/api/auth/login', { id, password });
+        const response = await axios.post('http://localhost:8080/api/auth/login', { id, password });
       // const response = await axios.post('http://192.168.45.217:8080/api/auth/login', { id, password });
-      const response = await axios.post('http://192.168.45.217:8080/api/auth/login', 
-        { id, password }, 
-        {
-          headers: {
-            Host: '192.168.0.39:3000', // 요청 헤더 추가
-          },
-        });
+    //   const response = await axios.post('http://192.168.45.217:8080/api/auth/login', { id, password }, 
+    //     {
+    //       headers: {
+    //         Host: '192.168.0.39:3000', // 요청 헤더 추가
+    //       },
+    //     });
       console.log(response.data.userId)
       if (response.data.userId) {
         dispatch({
