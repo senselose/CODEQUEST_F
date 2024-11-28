@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Container, Typography, TextField, Button, Divider } from '@mui/material';
+import { Box, Container, Typography, TextField, Button, Divider,  Dialog, DialogTitle, DialogContent, DialogActions, } from '@mui/material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import '../../css/Login.css';
@@ -21,17 +21,17 @@ const WhiteBox = styled(Box)({
   borderTopLeftRadius: '100px',
   padding: '20px',
   maxWidth: '100%',
-  zIndex: 1,
+  zIndex: 3,
   position: 'relative',
 });
 
 const OverlappingImage = styled(Box)({
   position: 'absolute',
-  top: '-100px',
-  right: '130px',
-  transform: 'translate(50%, 0)',
-  zIndex: 4,
-  width: '200px',
+  top: '-80px',
+  // right: '90px',
+  transform: 'translate(40%, 0)',
+  zIndex: 2,
+  width: '120px',
   height: 'auto',
 });
 
@@ -41,6 +41,13 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태
   const [fadeOut, setFadeOut] = useState(false); // 페이드 아웃 상태
   const [fadeIn, setFadeIn] = useState(true); // 페이드 인 상태
+  //아이디, 비밀번호 재설정
+  const [modalType, setModalType] = useState(null); // "findId" or "resetPassword"
+  const [formData, setFormData] = useState({}); // 공통 입력 데이터
+  const [responseMessage, setResponseMessage] = useState(''); // 응답 메시지
+  const [resetPasswordMode, setResetPasswordMode] = useState(false); // 비밀번호 재설정 모드
+  const [newPassword, setNewPassword] = useState(''); // 새 비밀번호
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -57,39 +64,215 @@ function Login() {
     return () => clearTimeout(fadeInTimeout);
   }, []);
 
-  const handleKakaoLogin = () => {
-    setIsLoading(true); // 로딩 시작
-    window.Kakao.Auth.login({
-      scope: 'profile_nickname, profile_image',
-      success: (authObj) => {
-        window.Kakao.API.request({
-          url: '/v2/user/me',
-          success: (res) => {
-            const profile = res.kakao_account.profile;
-            console.log("닉네임:", profile.nickname);
-            setTimeout(() => {
-              setFadeOut(true); // 페이드 아웃 시작
-              setTimeout(() => navigate('/main'), 500); // 메인으로 이동
-            }, 2000); // 로딩 지속 시간
-          },
-          fail: (err) => {
-            console.error("Kakao API Request Failed:", err);
-            setIsLoading(false); // 로딩 종료
-          },
-        });
-      },
-      fail: (err) => {
-        console.error("Kakao Login Failed:", err);
-        setIsLoading(false); // 로딩 종료
-      },
-    });
+        // const handleKakaoLogin = () => {
+        //   setIsLoading(true); // 로딩 시작
+        //   window.Kakao.API.request({
+        //     url: '/v2/user/me',
+        //     success: (res) => {
+        //       const profile = res.kakao_account.profile;
+          
+        //       console.log("닉네임:", profile.nickname);
+        //       console.log("썸네일 이미지:", profile.thumbnail_image_url);
+        //       console.log("고해상도 이미지:", profile.profile_image_url);
+          
+        //       if (profile.thumbnail_image_url) {
+        //         // 썸네일 이미지 존재 시 처리
+        //         console.log("Thumbnail Image URL:", profile.thumbnail_image_url);
+        //       } else {
+        //         console.warn("썸네일 이미지가 없습니다.");
+        //       }
+          
+        //       if (profile.profile_image_url) {
+        //         // 고해상도 이미지 존재 시 처리
+        //         console.log("Profile Image URL:", profile.profile_image_url);
+        //       } else {
+        //         console.warn("프로필 이미지가 없습니다.");
+        //       }
+        //     },
+        //     fail: (err) => {
+        //       console.error("Kakao API Request Failed:", err);
+        //     },
+        //   });
+          
+        // };
+
+        const handleKakaoLogin = () => {
+          setIsLoading(true); // 로딩 시작
+      
+          // Kakao 로그인 요청
+          window.Kakao.Auth.login({
+            scope: 'profile_nickname, profile_image',
+            success: (authObj) => {
+              console.log("Kakao Auth Success:", authObj);
+      
+              // 사용자 정보 요청
+              window.Kakao.API.request({
+                url: '/v2/user/me',
+                success: async (res) => {
+                  const profile = res.kakao_account.profile;
+                  const kakaoUserData = {
+                    nickname: profile.nickname,
+                    thumbnailImageUrl: profile.thumbnail_image_url,
+                    profileImageUrl: profile.profile_image_url,
+                  };
+      
+                  console.log("Kakao User Data:", kakaoUserData);
+      
+                  // 서버로 전송
+                  try {
+                    const response = await axios.post('http://localhost:8080/kakaoLogin', kakaoUserData);
+                    // const response = await axios.post('http://192.168.45.217:8080/kakaoLogin', kakaoUserData);
+                    // const response = await axios.post('http://192.168.45.217:8080/kakaoLogin', 
+                    //   kakaoUserData, 
+                    //   {
+                    //     headers: {
+                    //       Host: '192.168.45.217:3000',
+                    //     },
+                    //   });
+                    
+                    console.log("서버 응답:", response.data);
+                    alert("카카오 로그인 성공!");
+                    navigate('/main');
+                  } catch (error) {
+                    console.error("카카오 유저 저장 실패:", error);
+                    alert("카카오 로그인 중 문제가 발생했습니다.");
+                  } finally {
+                    setIsLoading(false); // 로딩 종료
+                  }
+                },
+                fail: (err) => {
+                  console.error("Kakao API Request Failed:", err);
+                  setIsLoading(false); // 로딩 종료
+                },
+              });
+            },
+            fail: (err) => {
+              console.error("Kakao Login Failed:", err);
+              setIsLoading(false); // 로딩 종료
+            },
+          });
+        };
+
+
+        const handleFindIdSubmit = async () => {
+          try {
+              const response = await axios.post('/api/auth/findId', null, {
+                  params: formData, // 이름, 핸드폰 번호, 이메일
+              });
+      
+              if (response.data.username) {
+                  setResponseMessage(`아이디는 "${response.data.username}" 입니다.`);
+              } else {
+                  setResponseMessage('일치하는 사용자를 찾을 수 없습니다.');
+              }
+          } catch (error) {
+              const errorMsg = error.response?.data?.message || '오류가 발생했습니다.';
+              setResponseMessage(errorMsg);
+          }
+      };
+      
+    //   const handleResetPasswordSubmit = async () => {
+    //     try {
+    //         const response = await axios.post('/api/auth/resetPassword', null, {
+    //             params: formData, // 이름, 아이디, 이메일
+    //         });
+    
+    //         if (response.data.message === '성공') {
+    //             setResetPasswordMode(true); // 비밀번호 재설정 모드 활성화
+    //         } else {
+    //             setResponseMessage('사용자 정보가 일치하지 않습니다.');
+    //         }
+    //     } catch (error) {
+    //         const errorMsg = error.response?.data?.message || '오류가 발생했습니다.';
+    //         setResponseMessage(errorMsg);
+    //     }
+    // };
+    
+    const handleNewPasswordSubmit = async () => {
+      try {
+          const response = await axios.post('/api/auth/updatePassword', {
+              id: formData.id,
+              newPassword,
+          });
+  
+          if (response.data.message === '비밀번호 변경 성공') {
+              alert('비밀번호가 성공적으로 변경되었습니다.');
+              setResetPasswordMode(false); // 비밀번호 재설정 모드 비활성화
+              setModalType(null); // 모달 닫기
+          } else {
+              setResponseMessage('비밀번호 변경 실패');
+          }
+      } catch (error) {
+          alert('비밀번호 변경 중 오류가 발생했습니다.');
+      }
   };
 
+
+    const handleInputChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+      
+    
+    const handleResetPasswordSubmit = async () => {
+        try {
+            const response = await axios.post('/api/auth/resetPassword', {
+                name: formData.name,
+                id: formData.id,
+                email: formData.mail,
+                password: formData.password, // 새 비밀번호를 기존 password 필드로 전송
+            });
+    
+            if (response.data.message.includes('성공')) {
+                alert('비밀번호가 변경되었습니다.');
+                setModalType(null); // 모달 닫기
+            } else {
+                alert(response.data.message);
+            }
+        } catch (error) {
+            alert('오류가 발생했습니다.');
+        }
+    };
+
+    const handleModalSubmit = async () => {
+        try {
+            const endpoint = modalType === 'findId' 
+                ? '/api/auth/findId' 
+                : '/api/auth/resetPassword';
+    
+            const response = await axios.post(endpoint, null, {
+                params: formData, // 쿼리 매개변수로 전달
+            });
+    
+            // 성공 메시지 처리
+            setResponseMessage(response.data.message); // 성공 메시지 설정
+            if (modalType === 'findId' && response.data.userInfo) {
+                setFormData({ ...formData, userInfo: response.data.userInfo }); // 아이디 저장
+            }
+            alert(response.data.message);
+            setModalType(null); // 모달 닫지 않음, 텍스트 표시
+        } catch (error) {
+            const errorMsg = error.response?.data?.message || '오류가 발생했습니다.';
+            setResponseMessage(errorMsg);
+            alert(errorMsg);
+        }
+    };
+    
+
+      
+
+      
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true); // 로딩 시작
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', { id, password });
+        const response = await axios.post('http://localhost:8080/api/auth/login', { id, password });
+      // const response = await axios.post('http://192.168.45.217:8080/api/auth/login', { id, password });
+    //   const response = await axios.post('http://192.168.45.217:8080/api/auth/login', { id, password }, 
+    //     {
+    //       headers: {
+    //         Host: '192.168.0.39:3000', // 요청 헤더 추가
+    //       },
+    //     });
       console.log(response.data.userId)
       if (response.data.userId) {
         dispatch({
@@ -113,85 +296,179 @@ function Login() {
   };
 
   return (
-    <div className={`login-container ${fadeIn ? 'fade-in' : ''} ${fadeOut ? 'fade-out' : ''}`}>
-      {isLoading ? (
-        <div className="loading-screen">
-        {/* 로고 이미지 */}
-          <img src="/logo.png" alt="Loading..." className="loading-logo" />
-        </div>
-      ) : (
-        <Box sx={{ backgroundColor: '#000', minHeight: '100%', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
-          <Container sx={{ fullWidth: '100%', paddingTop: '40px' }}>
-            <BackgroundBox>
-              <Container sx={{ width: '100%', px: 6, pt: 7 }}>
-                <Typography variant="h4" fontWeight="bold" color="#00DFEE" align="left">
-                  Welcome! <br />
-                  Hello.
-                </Typography>
-              </Container>
-            </BackgroundBox>
+    <div id="root" inert={!!modalType} className={`login-container ${fadeIn ? 'fade-in' : ''} ${fadeOut ? 'fade-out' : ''}`}>
+        {isLoading ? (
+            <div className="loading-screen">
+                <img src="/logo.png" alt="Loading..." className="loading-logo" />
+            </div>
+        ) : (
+            <Box sx={{ backgroundColor: '#000', minHeight: '100%', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
+                <Container sx={{ fullWidth: '100%', paddingTop: '40px' }}>
+                    <BackgroundBox>
+                        <Container sx={{ width: '100%', px: 6, pt: 7 }}>
+                            <Typography variant="h4" fontWeight="bold" color="#00DFEE" align="left">
+                                Welcome! <br />
+                                Hello.
+                            </Typography>
+                        </Container>
+                    </BackgroundBox>
 
-            <WhiteBox sx={{ marginTop: '70px' }}>
-              <OverlappingImage component="img" src="/fireboyreal.png" alt="Logo" />
-              <Typography variant="h5" fontWeight="bold" align="center" sx={{ mb: 2, paddingTop: '20px',  color: '#000'}}>
-                LOGIN
-              </Typography>
-              <form onSubmit={handleLogin}>
+                    <WhiteBox sx={{ marginTop: '70px' }}>
+                        <OverlappingImage component="img" src="/fireboyreal.png" alt="Logo" />
+                        <Typography variant="h5" fontWeight="bold" align="center" sx={{ mb: 2, paddingTop: '20px', color: '#000' }}>
+                            LOGIN
+                        </Typography>
+                        <form onSubmit={handleLogin}>
+                            <TextField
+                                label="아이디"
+                                type="text"
+                                value={id}
+                                fullWidth
+                                onChange={(e) => setId(e.target.value)}
+                                margin="normal"
+                                required
+                            />
+                            <TextField
+                                label="비밀번호"
+                                type="password"
+                                value={password}
+                                fullWidth
+                                onChange={(e) => setPassword(e.target.value)}
+                                margin="normal"
+                                required
+                            />
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                fullWidth
+                                sx={{ mt: 2, backgroundColor: '#000', color: '#fff', '&:hover': { backgroundColor: '#333' } }}
+                            >
+                                Sign In
+                            </Button>
+                        </form>
+                        <Box display="flex" justifyContent="space-between" mt={1} sx={{ fontSize: '0.9em', color: '#666' }}>
+                            <Button variant="text" color="inherit" size="small" onClick={() => setModalType('findId')}>
+                                아이디 찾기
+                            </Button>
+                            <Button variant="text" color="inherit" size="small" onClick={() => setModalType('resetPassword')}>
+                                비밀번호 재설정
+                            </Button>
+                            <Button variant="text" color="inherit" size="small" onClick={() => navigate('/Register')}>
+                                회원가입
+                            </Button>
+                        </Box>
+                        <Divider sx={{ mt: 1, color: '#000', mb: 1 }}>SNS 계정으로 이용하기</Divider>
+                        <Box display="flex" justifyContent="center" mt={1}>
+                            <Button
+                                variant="contained"
+                                onClick={handleKakaoLogin}
+                                sx={{ backgroundColor: '#FEE500', color: '#000', '&:hover': { backgroundColor: '#FFD700' }, fontWeight: 'bold' }}
+                                fullWidth
+                            >
+                                카카오로 로그인
+                            </Button>
+                        </Box>
+                    </WhiteBox>
+                </Container>
+            </Box>
+        )}
+
+        {/* 아이디 찾기 및 비밀번호 재설정 모달 */}
+        <Dialog open={!!modalType} onClose={() => setModalType(null)}>
+    <DialogTitle>
+        {modalType === 'findId' ? '아이디 찾기' : resetPasswordMode ? '새 비밀번호 입력' : '비밀번호 재설정'}
+    </DialogTitle>
+    <DialogContent>
+        {modalType === 'findId' ? (
+            <>
                 <TextField
-                  label="아이디"
-                  type="text"
-                  value={id}
-                  fullWidth
-                  onChange={(e) => setId(e.target.value)}
-                  margin="normal"
-                  required
+                    label="이름"
+                    name="name"
+                    fullWidth
+                    margin="normal"
+                    onChange={handleInputChange}
                 />
                 <TextField
-                  label="비밀번호"
-                  type="password"
-                  value={password}
-                  fullWidth
-                  onChange={(e) => setPassword(e.target.value)}
-                  margin="normal"
-                  required
+                    label="핸드폰 번호"
+                    name="phone"
+                    fullWidth
+                    margin="normal"
+                    onChange={handleInputChange}
                 />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                  sx={{ mt: 2, backgroundColor: '#000', color: '#fff', '&:hover': { backgroundColor: '#333' } }}
-                >
-                  Sign In
-                </Button>
-              </form>
-              <Box display="flex" justifyContent="space-between" mt={1} sx={{ fontSize: '0.9em', color: '#666' }}>
-                <Button variant="text" color="inherit" size="small">
-                  비밀번호 재설정
-                </Button>
-                <Button variant="text" color="inherit" size="small">
-                  아이디 찾기
-                </Button>
-                <Button variant="text" color="inherit" size="small" onClick={() => navigate('/Register')}>
-                  회원가입
-                </Button>
-              </Box>
-              <Divider sx={{ mt: 1,  color: '#000', mb: 1 }}>SNS 계정으로 이용하기</Divider>
-              <Box display="flex" justifyContent="center" mt={1}>
-                <Button
-                  variant="contained"
-                  onClick={handleKakaoLogin}
-                  sx={{ backgroundColor: '#FEE500', color: '#000', '&:hover': { backgroundColor: '#FFD700' }, fontWeight: 'bold' }}
-                  fullWidth
-                >
-                  카카오로 로그인
-                </Button>
-              </Box>
-            </WhiteBox>
-          </Container>
-        </Box>
-      )}
+                <TextField
+                    label="이메일"
+                    name="mail"
+                    fullWidth
+                    margin="normal"
+                    onChange={handleInputChange}
+                />
+                {responseMessage && (
+                    <Typography variant="body1" sx={{ mt: 2, color: 'green' }}>
+                        {responseMessage}
+                    </Typography>
+                )}
+            </>
+        ) : resetPasswordMode ? (
+            <>
+                <TextField
+                    label="새 비밀번호"
+                    type="password"
+                    fullWidth
+                    margin="normal"
+                    onChange={(e) => setNewPassword(e.target.value)}
+                />
+                {responseMessage && (
+                    <Typography variant="body1" sx={{ mt: 2, color: 'red' }}>
+                        {responseMessage}
+                    </Typography>
+                )}
+            </>
+        ) : (
+            <>
+                <TextField
+                    label="이름"
+                    name="name"
+                    fullWidth
+                    margin="normal"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    label="아이디"
+                    name="id"
+                    fullWidth
+                    margin="normal"
+                    onChange={handleInputChange}
+                />
+                <TextField
+                    label="이메일"
+                    name="mail"
+                    fullWidth
+                    margin="normal"
+                    onChange={handleInputChange}
+                />
+                {responseMessage && (
+                    <Typography variant="body1" sx={{ mt: 2, color: 'green' }}>
+                        {responseMessage}
+                    </Typography>
+                )}
+            </>
+        )}
+    </DialogContent>
+    <DialogActions>
+        <Button onClick={() => setModalType(null)}>로그인 하러 가기</Button>
+        {modalType === 'findId' ? (
+            <Button onClick={handleFindIdSubmit}>아이디 찾기</Button>
+        ) : resetPasswordMode ? (
+            <Button onClick={handleNewPasswordSubmit}>비밀번호 저장</Button>
+        ) : (
+            <Button onClick={handleResetPasswordSubmit}>확인</Button>
+        )}
+    </DialogActions>
+</Dialog>
+
     </div>
-  );
+);
+
 }
 
 export default Login;
