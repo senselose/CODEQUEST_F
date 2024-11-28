@@ -20,7 +20,11 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CommentIcon from "@mui/icons-material/Comment";
 
-function BoardList({ showSearch = true, showWriteButton = true, sortCriteria }) {
+function BoardList({
+  showSearch = true,
+  showWriteButton = true,
+  sortCriteria,
+}) {
   const [posts, setPosts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,7 +65,7 @@ function BoardList({ showSearch = true, showWriteButton = true, sortCriteria }) 
       const response = await axios.get("http://localhost:8080/api/boards", {
         params,
       });
-      
+
       setPosts(response.data.content || []);
       setTotalPages(response.data.totalPages || 1);
     } catch (error) {
@@ -89,7 +93,12 @@ function BoardList({ showSearch = true, showWriteButton = true, sortCriteria }) 
   return (
     <Container maxWidth="md" sx={{ marginTop: 4 }}>
       {/* 상단 검색 및 글쓰기 */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
         {showSearch && (
           <TextField
             label="제목 검색"
@@ -116,7 +125,10 @@ function BoardList({ showSearch = true, showWriteButton = true, sortCriteria }) 
         {showSearch && (
           <Button
             variant="contained"
-            sx={{ backgroundColor: "#FF8C94", "&:hover": { backgroundColor: "#e57a82" } }}
+            sx={{
+              backgroundColor: "#FF8C94",
+              "&:hover": { backgroundColor: "#e57a82" },
+            }}
             onClick={handleSearch}
           >
             검색
@@ -135,20 +147,6 @@ function BoardList({ showSearch = true, showWriteButton = true, sortCriteria }) 
         }}
       >
         <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ color: "#FFFFFF", fontWeight: "bold" }}>제목</TableCell>
-              <TableCell align="center" sx={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                조회수
-              </TableCell>
-              <TableCell align="center" sx={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                좋아요
-              </TableCell>
-              <TableCell align="center" sx={{ color: "#FFFFFF", fontWeight: "bold" }}>
-                댓글
-              </TableCell>
-            </TableRow>
-          </TableHead>
           <TableBody>
             {posts.length > 0 ? (
               posts.map((post) => (
@@ -166,6 +164,9 @@ function BoardList({ showSearch = true, showWriteButton = true, sortCriteria }) 
                     transition: "all 0.3s ease-in-out",
                   }}
                 >
+                  
+
+                  {/* 제목 셀 */}
                   <TableCell
                     sx={{
                       color: "#00DFEE",
@@ -178,23 +179,87 @@ function BoardList({ showSearch = true, showWriteButton = true, sortCriteria }) 
                   >
                     {post.title}
                   </TableCell>
-                  <TableCell align="center" sx={{ color: "#83E3E9" }}>
-                    <VisibilityIcon sx={{ verticalAlign: "middle", marginRight: 0.5 }} />
-                    {post.views}
+
+                  {/* 좋아요 셀 */}
+                  <TableCell
+                    align="right"
+                    sx={{
+                      color: "#00DFEE", // 텍스트 색상 지정
+                      textAlign: "right", // 오른쪽 정렬
+                      verticalAlign: "bottom", // 아래쪽 정렬
+                      fontSize: "12px", // 텍스트 크기 축소
+                      paddingBottom: "4px", // 아래쪽 여백 조정
+                    }}
+                  >
+                    <VisibilityIcon
+                      sx={{
+                        verticalAlign: "bottom",
+                        marginRight: "4px",
+                        fontSize: "16px", // 아이콘 크기 축소
+                        color: "#83E3E9", // 아이콘 색상 유지
+                      }}
+                    />
+                    <span style={{ marginLeft: "2px" }}>{post.views}</span>{" "}
+                    {/* 간격 추가 */}
+                    <FavoriteIcon
+                      sx={{
+                        verticalAlign: "bottom",
+                        marginRight: "4px",
+                        marginLeft: "3px", // 아이콘과 이전 텍스트 간 간격 추가
+                        fontSize: "16px", // 아이콘 크기 축소
+                        color: "#FF8C94", // 아이콘 색상 유지
+                      }}
+                    />
+                    <span style={{ marginLeft: "2px" }}>
+                      {post.likes?.length || 0}
+                    </span>{" "}
+                    {/* 간격 추가 */}
+                    <CommentIcon
+                      sx={{
+                        verticalAlign: "bottom",
+                        marginRight: "4px",
+                        marginLeft: "3px", // 아이콘과 이전 텍스트 간 간격 추가
+                        fontSize: "16px", // 아이콘 크기 축소
+                        color: "#FFD700", // 아이콘 색상 유지
+                      }}
+                    />
+                    <span style={{ marginLeft: "2px" }}>
+                      {post.comments?.length || 0}
+                    </span>{" "}
+                    {/* 간격 추가 */}
                   </TableCell>
-                  <TableCell align="center" sx={{ color: "#FF8C94" }}>
-                    <FavoriteIcon sx={{ verticalAlign: "middle", marginRight: 0.5 }} />
-                    {post.likes?.length || 0}
-                  </TableCell>
-                  <TableCell align="center" sx={{ color: "#FFD700" }}>
-                    <CommentIcon sx={{ verticalAlign: "middle", marginRight: 0.5 }} />
-                    {post.comments?.length || 0}
+                  {/* 이미지 미리보기 셀 */}
+                  <TableCell align="center" sx={{ width: "50px" }}>
+                    {post.images && post.images.length > 0 ? (
+                      <img
+                        src={`http://localhost:8080/${post.images[0].filePath.replace(
+                          /^\/+/,
+                          ""
+                        )}`}
+                        alt="미리보기"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          backgroundColor: "#2a2a3c",
+                          borderRadius: "4px",
+                        }}
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} align="center" sx={{ color: "#FFFFFF" }}>
+                <TableCell colSpan={5} align="center" sx={{ color: "#FFFFFF" }}>
                   게시글이 없습니다.
                 </TableCell>
               </TableRow>
@@ -258,20 +323,20 @@ export default BoardList;
 //         console.error("Invalid sortCriteria:", sortCriteria);
 //         return;
 //       }
-  
+
 //       const params = {
 //         page: currentPage - 1,
 //         size: postsPerPage,
 //         sort: `${sortCriteria.key},${sortCriteria.order}`,
 //       };
-  
+
 //       // 추가 필터링 조건
 //       if (sortCriteria.filter === "last30Days") {
 //         params["filterDate"] = 30; // 최근 30일 데이터 필터링
 //       }
-  
+
 //       console.log("API 요청 파라미터:", params);
-  
+
 //       const response = await axios.get("http://localhost:8080/api/boards", {
 //         params,
 //       });
@@ -459,7 +524,6 @@ export default BoardList;
 // }
 
 // export default BoardList;
-
 
 // import React, { useEffect, useState } from "react";
 // import axios from "axios";
