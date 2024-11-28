@@ -56,6 +56,8 @@ function Register() {
     phone: '',
     nickName: '',
     agreeToTerms: false,
+    agreeMarketing: null, // 초기값 설정
+    method: 'local', // 기본값 설정
   });
 
 
@@ -245,17 +247,19 @@ function Register() {
         };
   
 
-  const handlePopupOpen = () => {
-    setOpenPopup(true); // CheckPersonal 모달 열기
-  };
+    const handlePopupOpen = () => {
+      setOpenPopup(true); // CheckPersonal 모달 열기
+    };
 
-  const handlePopupClose = (agree) => {
-    setOpenPopup(false); // CheckPersonal 모달 닫기
-    setFormData((prevData) => ({
-      ...prevData,
-      agreeToTerms: agree, // 동의 여부를 폼 데이터에 저장
-    }));
-  };
+    const handlePopupClose = (agree) => {
+      setOpenPopup(false); // 모달 닫기
+      setFormData((prevData) => ({
+        ...prevData,
+        agreeToTerms: agree.agreeToTerms, // 필수 동의 여부
+        agreeMarketing: agree.agreeMarketing ? 1 : null, // 마케팅 동의 여부 (1 또는 null)
+      }));
+    };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -270,7 +274,7 @@ function Register() {
       return;
     }
 
-    const { id, password, name, mail, nickName, phone } = formData;
+    const { id, password, name, mail, nickName, phone, agreeMarketing, method } = formData;
 
     try {
       const response = await axios.post('http://localhost:8080/api/auth/register', {
@@ -280,9 +284,11 @@ function Register() {
         mail,
         nickName,
         phone,
+        marketing: agreeMarketing, // 1 또는 null
+        method, // 회원가입 방식 (local)
       });
-
-      if (response.status === 200) {
+    
+      if (response.status === 201 || response.status === 200 ) {
         alert('회원가입이 완료되었습니다!');
         navigate('/');
       } else {
@@ -293,7 +299,6 @@ function Register() {
       alert('회원가입 요청 중 오류가 발생했습니다.');
     }
   };
-
   const handlePhoneVerification = () => {
     alert('핸드폰 본인 인증 절차를 진행합니다.');
   };
