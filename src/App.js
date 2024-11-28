@@ -9,9 +9,12 @@ import BoardDetail from './components/board/BoardDetail'; // BoardDetail import 
 import Register from './components/login/Register';
 import Main from './components/main/main';
 
+
 import { Provider } from "react-redux";
 import store from "./reducers/store"; // store.js 경로에 맞게 수정
 import FloatingButton from './components/floatingButton/FloatingButton';
+import Test from './components/board/Test';
+import Feed from './components/board/Feed';
 
 function App() {
   return (
@@ -24,7 +27,9 @@ function App() {
           <Route path="/main" element={<Main />} />
           <Route path="/BoardList" element={<BoardList />} /> {/* 오타 수정 */}
           <Route path="/board/:id" element={<BoardDetail />} /> {/* 게시글 상세 페이지 경로 추가 */}
-          <Route path="/register" element={<Register />} />        
+          <Route path="/register" element={<Register />} />    
+          {/* <Route path="/test" element={<Test/>} />     */}
+          <Route path="/feed" element={<Feed/>} />
         </Routes>
         <FloatingButton />
       </Router>

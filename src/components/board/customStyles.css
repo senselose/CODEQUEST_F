@@ -1,0 +1,6 @@
+
+  /* 활성화된 dots 스타일 (클릭된 dots 포함) */
+  .slick-dots li.slick-active button:before {
+    color: white !important; /* 활성화된 dots 색상 */
+    opacity: 1; /* 활성화된 dots 불투명도 */
+  }
