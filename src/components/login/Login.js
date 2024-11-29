@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import '../../css/Login.css';
 import { useDispatch } from 'react-redux';
 import { setUserId } from '../../actions/userActions';
-import ResetPassword from './ResetPassword.jsx';
-
+import ResetPassword from './ResetPassword';
+import FindId from './FindId';
 
 const BackgroundBox = styled(Box)({
   backgroundColor: '#000',
