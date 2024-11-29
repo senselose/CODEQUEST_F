@@ -50,7 +50,7 @@ const FloatingButton = () => {
         src={`${process.env.PUBLIC_URL}/fireboyreal.png`} // public 경로 이미지
         alt="icon"
         style={{
-          width: "100px",
+          width: "80px",
           height: "80px",
           marginRight: expanded ? "10px" : "0", // 확장 시 간격 추가
           transition: "margin 0.3s ease-in-out", // 부드러운 이동
