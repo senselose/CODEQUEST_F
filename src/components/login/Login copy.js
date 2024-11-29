@@ -7,7 +7,7 @@ import '../../css/Login.css';
 import { useDispatch } from 'react-redux';
 import { setUserId } from '../../actions/userActions';
 import ResetPassword from './ResetPassword.jsx';
-
+import FindId from './FindId.jsx';
 
 const BackgroundBox = styled(Box)({
   backgroundColor: '#000',
@@ -45,24 +45,11 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태
   const [fadeOut, setFadeOut] = useState(false); // 페이드 아웃 상태
   const [fadeIn, setFadeIn] = useState(true); // 페이드 인 상태
-  //아이디, 비밀번호 재설정
-
-  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
-
-  const handleOpenResetPassword = () => setIsResetPasswordOpen(true);
-  const handleCloseResetPassword = () => setIsResetPasswordOpen(false);
 
   const [modalType, setModalType] = useState(null); // "findId" or "resetPassword"
   const [formData, setFormData] = useState({}); // 공통 입력 데이터
-  const [responseMessage, setResponseMessage] = useState(''); // 응답 메시지
-  const [resetPasswordMode, setResetPasswordMode] = useState(false); // 비밀번호 재설정 모드
-  const [newPassword, setNewPassword] = useState(''); // 새 비밀번호
-  
-    // 임시 비밀번호 이메일 발송
-  const [user, setUser] = useState({
-    userMail: '',
-    useTel: '',
-  })
+
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -186,42 +173,6 @@ function Login() {
           }
       };
       
-    //   const handleResetPasswordSubmit = async () => {
-    //     try {
-    //         const response = await axios.post('/api/auth/resetPassword', null, {
-    //             params: formData, // 이름, 아이디, 이메일
-    //         });
-    
-    //         if (response.data.message === '성공') {
-    //             setResetPasswordMode(true); // 비밀번호 재설정 모드 활성화
-    //         } else {
-    //             setResponseMessage('사용자 정보가 일치하지 않습니다.');
-    //         }
-    //     } catch (error) {
-    //         const errorMsg = error.response?.data?.message || '오류가 발생했습니다.';
-    //         setResponseMessage(errorMsg);
-    //     }
-    // };
-    
-    const handleNewPasswordSubmit = async () => {
-      try {
-          const response = await axios.post('/api/auth/updatePassword', {
-              id: formData.id,
-              newPassword,
-          });
-  
-          if (response.data.message === '비밀번호 변경 성공') {
-              alert('비밀번호가 성공적으로 변경되었습니다.');
-              setResetPasswordMode(false); // 비밀번호 재설정 모드 비활성화
-              setModalType(null); // 모달 닫기
-          } else {
-              setResponseMessage('비밀번호 변경 실패');
-          }
-      } catch (error) {
-          alert('비밀번호 변경 중 오류가 발생했습니다.');
-      }
-  };
-
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -247,34 +198,7 @@ function Login() {
             alert('오류가 발생했습니다.');
         }
     };
-
-    const handleModalSubmit = async () => {
-        try {
-            const endpoint = modalType === 'findId' 
-                ? '/api/auth/findId' 
-                : '/api/auth/resetPassword';
-    
-            const response = await axios.post(endpoint, null, {
-                params: formData, // 쿼리 매개변수로 전달
-            });
-    
-            // 성공 메시지 처리
-            setResponseMessage(response.data.message); // 성공 메시지 설정
-            if (modalType === 'findId' && response.data.userInfo) {
-                setFormData({ ...formData, userInfo: response.data.userInfo }); // 아이디 저장
-            }
-            alert(response.data.message);
-            setModalType(null); // 모달 닫지 않음, 텍스트 표시
-        } catch (error) {
-            const errorMsg = error.response?.data?.message || '오류가 발생했습니다.';
-            setResponseMessage(errorMsg);
-            alert(errorMsg);
-        }
-    };
-    
-
       
-
       
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -387,124 +311,21 @@ function Login() {
                 </Container>
             </Box>
         )}
-
-        {/* 아이디 찾기 및 비밀번호 재설정 모달 */}
-        <Dialog open={!!modalType} onClose={() => setModalType(null)}>
-    <DialogTitle>
-        {modalType === 'findId' ? '아이디 찾기' : resetPasswordMode ? '새 비밀번호 입력' : '비밀번호 재설정'}
-    </DialogTitle>
-    <DialogContent>
-        {modalType === 'findId' ? (
-            <>
-                <TextField
-                    label="이름"
-                    name="name"
-                    fullWidth
-                    margin="normal"
-                    onChange={handleInputChange}
-                />
-                <TextField
-                    label="핸드폰 번호"
-                    name="phone"
-                    fullWidth
-                    margin="normal"
-                    onChange={handleInputChange}
-                />
-                <TextField
-                    label="이메일"
-                    name="mail"
-                    fullWidth
-                    margin="normal"
-                    onChange={handleInputChange}
-                />
-                {responseMessage && (
-                    <Typography variant="body1" sx={{ mt: 2, color: 'green' }}>
-                        {responseMessage}
-                    </Typography>
-                )}
-            </>
-        ) : resetPasswordMode ? (
-            <>
-                <TextField
-                    label="새 비밀번호"
-                    type="password"
-                    fullWidth
-                    margin="normal"
-                    onChange={(e) => setNewPassword(e.target.value)}
-                />
-                {responseMessage && (
-                    <Typography variant="body1" sx={{ mt: 2, color: 'red' }}>
-                        {responseMessage}
-                    </Typography>
-                )}
-            </>
-        ) : (
-            <>
-                <TextField
-                    label="이름"
-                    name="name"
-                    fullWidth
-                    margin="normal"
-                    onChange={handleInputChange}
-                />
-                <TextField
-                    label="아이디"
-                    name="id"
-                    fullWidth
-                    margin="normal"
-                    onChange={handleInputChange}
-                />
-                <TextField
-                    label="이메일"
-                    name="mail"
-                    fullWidth
-                    margin="normal"
-                    onChange={handleInputChange}
-                />
-                <TextField
-                    label="핸드폰 번호"
-                    name="phone"
-                    fullWidth
-                    margin="normal"
-                    onChange={handleInputChange}
-                />
-                
-                {responseMessage && (
-                    <Typography variant="body1" sx={{ mt: 2, color: 'green' }}>
-                        {responseMessage}
-                    </Typography>
-                )}
-            </>
-        )}
-    </DialogContent>
-    <DialogActions>
-        {modalType === 'findId' ? (
-            <Button onClick={handleFindIdSubmit}>아이디 찾기</Button>
-        ) : resetPasswordMode ? (
-            <Button onClick={handleNewPasswordSubmit}>비밀번호 발급</Button>
-        ) : (
-            <Button onClick={handleResetPasswordSubmit}>임시비밀번호 발급</Button>
-        )}
-        <Button onClick={() => setModalType(null)}>로그인 하러 가기</Button>
-    </DialogActions>
-</Dialog>
-
     <div>
-      <Button onClick={handleOpenResetPassword}>비밀번호 재설정</Button>
+        <Button onClick={() => setModalType('findId')}>아이디 찾기</Button>
+        <Button onClick={() => setModalType('resetPassword')}>비밀번호 재설정</Button>
 
-      <Dialog open={isResetPasswordOpen} onClose={handleCloseResetPassword}>
-        <DialogContent>
-          <ResetPassword onClose={handleCloseResetPassword} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseResetPassword}>닫기</Button>
-        </DialogActions>
-      </Dialog>
-    </div>
-    </div>
-
-);
-
+        <Dialog open={!!modalType} onClose={handleCloseModal}>
+            <DialogTitle>
+            {modalType === 'findId' ? '아이디 찾기' : '비밀번호 재설정'}
+            </DialogTitle>
+            <DialogContent>
+            {modalType === 'findId' && <FindId onClose={handleCloseModal} />}
+            {modalType === 'resetPassword' && <ResetPassword onClose={handleCloseModal} />}
+            </DialogContent>
+        </Dialog>
+        </div>
+        </div>
+    );
 }
-
 export default Login;
