@@ -81,6 +81,17 @@ function Register() {
   // 아이디
   const [idMessage, setIdMessage] = useState(''); // 아이디 메시지 상태
   const [isIdValid, setIsIdValid] = useState(null); // 아이디 유효성 상태 (true/false/null)
+
+  const validateId = (id) => {
+    const regex = /^[a-zA-Z]{4,}$/; // 4글자 이상, 영문만 허용
+    if (!regex.test(id)) {
+      setIdMessage('아이디는 영문 4글자 이상이어야 합니다.');
+      setIsIdValid(false);
+    } else {
+      setIdMessage('사용할 수 있는 아이디입니다.');
+      setIsIdValid(true);
+    }
+  };
    // 이메일
    const [mailMessage, setMailMessage] = useState(''); // 아이디 메시지 상태
    const [isMailValid, setIsMailValid] = useState(null); // 아이디 유효성 상태 (true/false/null)
@@ -115,7 +126,17 @@ function Register() {
       setPasswordError('');
     }
   };
-
+// 닉네임 유효성 검사 추가
+  const validateNickName = (nickName) => {
+    if (nickName.length < 2) {
+      setNickNameMessage('닉네임은 2글자 이상이어야 합니다.');
+      setIsNickNameValid(false);
+    } else {
+      setNickNameMessage('사용할 수 있는 닉네임입니다.');
+      setIsNickNameValid(true);
+    }
+  };
+  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -132,8 +153,8 @@ function Register() {
     if (name === 'id') {
       setIdMessage('');
       setIsIdValid(null);
+      validateId(value); // 유효성 검사 추가
     }
-
     
     // 이메일 변경 시 메시지 초기화
     if (name === 'mail') {
@@ -146,6 +167,8 @@ function Register() {
     if (name === 'nickName') {
       setNickNameMessage('');
       setIsNickNameValid(null);
+      validateNickName(value); // 유효성 검사 추가
+
     }
   };
 
@@ -160,6 +183,9 @@ function Register() {
             return;
           }
         
+          validateId(formData.id); // 유효성 검사
+          if (!isIdValid) return; // 유효하지 않은 경우 API 호출 중단   
+
           try {
             const response = await axios.get("http://localhost:8080/api/auth/checkId", {
               params: { id : formData.id },
@@ -218,12 +244,15 @@ function Register() {
         const checkNickNameDuplicate = async () => {
           console.log("Checking nickName:", formData.nickName); // 디버깅 로그
         
-          if (!formData.nickName) {
+          if (!formData.nickName) { 
             setNickNameMessage("닉네임을 입력하세요.");
             setIsNickNameValid(false);
             return;
           }
-        
+          validateNickName(formData.nickName); // 유효성 검사
+          if (!isNickNameValid) return; // 유효하지 않은 경우 API 호출 중단
+
+
           try {
             const response = await axios.get("http://localhost:8080/api/auth/checkNickName", {
               params: { nickName: formData.nickName },

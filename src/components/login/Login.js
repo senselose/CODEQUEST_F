@@ -13,7 +13,7 @@ const BackgroundBox = styled(Box)({
   backgroundColor: '#000',
   display: 'flex',
   maxWidth: '390px',
-  maxHeight: '100%',
+  maxHeight: '100',
 //   flexDirection: 'column',
   position: 'relative',
   zIndex: 1, // 가장 아래 레이어
@@ -490,8 +490,6 @@ function Login() {
 </Dialog>
 
     <div>
-      <Button onClick={handleOpenResetPassword}>비밀번호 재설정</Button>
-
       <Dialog open={isResetPasswordOpen} onClose={handleCloseResetPassword}>
         <DialogContent>
           <ResetPassword onClose={handleCloseResetPassword} />
