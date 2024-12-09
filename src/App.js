@@ -8,7 +8,7 @@ import BoardList from './components/board/BoardList';
 import BoardDetail from './components/board/BoardDetail'; // BoardDetail import 추가
 import Register from './components/login/Register';
 import Main from './components/main/main';
-import SevenHell from './components/main/SevenHell';
+import SevenHell from './components/menu/SevenHell';
 // import HellPages from './components/main/pages/HellPages'; // 경로에 맞게 수정
 
 import { Provider } from "react-redux";
@@ -16,12 +16,14 @@ import store from "./reducers/store"; // store.js 경로에 맞게 수정
 import FloatingButton from './components/floatingButton/FloatingButton';
 import Test from './components/board/Test';
 import Feed from './components/board/Feed';
-import YoutubeEmbed from './components/main/YoutubeEmbed.js';
-import MyPage from './components/main/MyPage.js';
+import YoutubeEmbed from './components/menu/YoutubeEmbed.js';
+import MyPage from './components/menu/MyPage.js';
+import Header from "./components/header.js"; // 경로에 따라 수정
 
 
 function App() {
   return (
+
     <Provider store={store}>
       <Router>
         <Routes>
@@ -42,6 +44,8 @@ function App() {
           {/* <Route path="/test" element={<Test/>} />     */}
           <Route path="/feed" element={<Feed/>} />
         </Routes>
+
+        {/* 전역 FloatingButton */}
         <FloatingButton />
       </Router>
     </Provider>

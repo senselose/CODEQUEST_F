@@ -10,6 +10,7 @@ const initialState = {
           ...state,
           userId: action.payload,
         };
+        
       default:
         return state;
     }

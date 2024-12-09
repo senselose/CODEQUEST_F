@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import BoardList from "../board/BoardList";
 import {
   Tabs,
@@ -20,8 +20,8 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import SidebarMenu from "./SidebarMenu";
-
+import SidebarMenu from "../menu/SidebarMenu";
+import Header from "../header";
   // 다크모드 테마 생성
   const darkTheme = createTheme({
     palette: {
@@ -43,10 +43,10 @@ import SidebarMenu from "./SidebarMenu";
   
 const Main = ({ posts = [] }) => {
   // posts의 기본값을 빈 배열로 설정
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
   const [filteredPosts, setFilteredPosts] = useState([]); // 초기값 빈 배열
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
 
 
@@ -62,10 +62,10 @@ const Main = ({ posts = [] }) => {
     }, // 곧 소멸될 감정
   ];
 
-  //사이드바 토글
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  // //사이드바 토글
+  // const toggleSidebar = () => {
+  //   setIsSidebarOpen(!isSidebarOpen);
+  // };
 
   
   const handleTabChange = (event, newValue) => {
@@ -86,15 +86,15 @@ const Main = ({ posts = [] }) => {
     return [...data].sort((a, b) => b.likes - a.likes).slice(0, limit);
   };
 
-    const handleMenuClick = (path) => {
-      if (path.startsWith("http")) {
-        // 외부 URL로 이동
-        window.location.href = path;
-      } else {
-        // 내부 경로로 이동
-        navigate(path);
-      }
-    };
+    // const handleMenuClick = (path) => {
+    //   if (path.startsWith("http")) {
+    //     // 외부 URL로 이동
+    //     window.location.href = path;
+    //   } else {
+    //     // 내부 경로로 이동
+    //     navigate(path);
+    //   }
+    // };
 
   useEffect(() => {
     console.log("Current Tab:", selectedTab);
@@ -132,40 +132,9 @@ const Main = ({ posts = [] }) => {
   return (
     <ThemeProvider theme={darkTheme}>
       <div style={{ position: "relative" }}>
-        {/* 메뉴 아이콘 */}
         {/* 메뉴바 컴포넌트 */}
-        <SidebarMenu
-            isOpen={isSidebarOpen}
-            toggleSidebar={toggleSidebar}
-            handleMenuClick={handleMenuClick}
-          />
-        {/* 로고 및 상단 배경 */}
-        <div style={{ position: "relative", height: "8vh", width: "100vw" }}>
-          <img
-            src="loading_background.gif"
-            alt="Background"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "8vh",
-              objectFit: "cover",
-              zIndex: -1,
-            }}
-          />
-          <img
-            src="logo.png"
-            alt="Logo"
-            style={{
-              height: "80px",
-              marginTop: "8px",
-              marginLeft: "50px",
-              cursor: "pointer",
-              zIndex: 1,
-            }}
-          />
-        </div>
+        <Header backgroundSrc="loading_background.gif" logoSrc="logo.png" />
+
         {/* 상단 탭 */}
         <Box
           sx={{

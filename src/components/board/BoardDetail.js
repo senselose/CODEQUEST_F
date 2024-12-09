@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -21,6 +22,9 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import Header from "../../components/header";
+
+
 
 function BoardDetail() {
   const { id } = useParams(); // 게시글 ID
@@ -455,7 +459,11 @@ function BoardDetail() {
   // JSX 렌더링 부분
   return (
     <ThemeProvider theme={darkTheme}>
+        {/* 메뉴바 컴포넌트 */}
+        <Header backgroundSrc="/loading_background.gif" logoSrc="/logo.png" />
+
       <CssBaseline />
+      
       <Container maxWidth="md" style={{ padding: "20px" }}>
         <Paper elevation={4} style={{ padding: "30px", borderRadius: "8px" }}>
           <Box mb={3}>
