@@ -16,9 +16,11 @@ import store from "./reducers/store"; // store.js 경로에 맞게 수정
 import FloatingButton from './components/floatingButton/FloatingButton';
 import Test from './components/board/Test';
 import Feed from './components/board/Feed';
+
 import YoutubeEmbed from './components/menu/YoutubeEmbed.js';
-import MyPage from './components/menu/MyPage.js';
 import Header from "./components/header.js"; // 경로에 따라 수정
+import MyPage from './components/profile/MyPage.js';
+
 
 
 function App() {
