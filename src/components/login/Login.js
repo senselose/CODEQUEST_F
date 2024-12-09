@@ -66,13 +66,26 @@ function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+//   useEffect(() => {
+//     if (!window.Kakao.isInitialized()) {
+//       window.Kakao.init('9ad17f158e56a3e1472d0143dc6418b2');
+//       console.log("Kakao SDK Initialized:", window.Kakao.isInitialized());
+//     } else {
+//       console.log("Kakao SDK already initialized.");
+//     }
+
+//     // 페이드 인 효과 시작
+//     const fadeInTimeout = setTimeout(() => setFadeIn(false), 500); // 페이드 인 지속 시간
+//     return () => clearTimeout(fadeInTimeout);
+//   }, []);
+
   useEffect(() => {
-    if (!window.Kakao.isInitialized()) {
-      window.Kakao.init('9ad17f158e56a3e1472d0143dc6418b2');
-      console.log("Kakao SDK Initialized:", window.Kakao.isInitialized());
-    } else {
-      console.log("Kakao SDK already initialized.");
-    }
+    // if (!window.Kakao.isInitialized()) {
+    //   window.Kakao.init('9ad17f158e56a3e1472d0143dc6418b2');
+    //   console.log("Kakao SDK Initialized:", window.Kakao.isInitialized());
+    // } else {
+    //   console.log("Kakao SDK already initialized.");
+    // }
 
     // 페이드 인 효과 시작
     const fadeInTimeout = setTimeout(() => setFadeIn(false), 500); // 페이드 인 지속 시간
@@ -111,62 +124,62 @@ function Login() {
           
         // };
 
-        const handleKakaoLogin = () => {
-          setIsLoading(true); // 로딩 시작
+        // const handleKakaoLogin = () => {
+        //   setIsLoading(true); // 로딩 시작
       
-          // Kakao 로그인 요청
-          window.Kakao.Auth.login({
-            scope: 'profile_nickname, profile_image',
-            success: (authObj) => {
-              console.log("Kakao Auth Success:", authObj);
+        //   // Kakao 로그인 요청
+        //   window.Kakao.Auth.login({
+        //     scope: 'profile_nickname, profile_image',
+        //     success: (authObj) => {
+        //       console.log("Kakao Auth Success:", authObj);
       
-              // 사용자 정보 요청
-              window.Kakao.API.request({
-                url: '/v2/user/me',
-                success: async (res) => {
-                  const profile = res.kakao_account.profile;
-                  const kakaoUserData = {
-                    nickname: profile.nickname,
-                    thumbnailImageUrl: profile.thumbnail_image_url,
-                    profileImageUrl: profile.profile_image_url,
-                  };
+        //       // 사용자 정보 요청
+        //       window.Kakao.API.request({
+        //         url: '/v2/user/me',
+        //         success: async (res) => {
+        //           const profile = res.kakao_account.profile;
+        //           const kakaoUserData = {
+        //             nickname: profile.nickname,
+        //             thumbnailImageUrl: profile.thumbnail_image_url,
+        //             profileImageUrl: profile.profile_image_url,
+        //           };
       
-                  console.log("Kakao User Data:", kakaoUserData);
+        //           console.log("Kakao User Data:", kakaoUserData);
       
-                  // 서버로 전송
-                  try {
-                    const response = await axios.post('http://localhost:8080/kakaoLogin', kakaoUserData);
-                    // const response = await axios.post('http://192.168.45.217:8080/kakaoLogin', kakaoUserData);
-                    // const response = await axios.post('http://192.168.45.217:8080/kakaoLogin', 
-                    //   kakaoUserData, 
-                    //   {
-                    //     headers: {
-                    //       Host: '192.168.45.217:3000',
-                    //     },
-                    //   });
+        //           // 서버로 전송
+        //           try {
+        //             const response = await axios.post('http://localhost:8080/kakaoLogin', kakaoUserData);
+        //             // const response = await axios.post('http://192.168.45.217:8080/kakaoLogin', kakaoUserData);
+        //             // const response = await axios.post('http://192.168.45.217:8080/kakaoLogin', 
+        //             //   kakaoUserData, 
+        //             //   {
+        //             //     headers: {
+        //             //       Host: '192.168.45.217:3000',
+        //             //     },
+        //             //   });
                     
-                    console.log("서버 응답:", response.data);
-                    alert("카카오 로그인 성공!");
-                    navigate('/main');
-                  } catch (error) {
-                    console.error("카카오 유저 저장 실패:", error);
-                    alert("카카오 로그인 중 문제가 발생했습니다.");
-                  } finally {
-                    setIsLoading(false); // 로딩 종료
-                  }
-                },
-                fail: (err) => {
-                  console.error("Kakao API Request Failed:", err);
-                  setIsLoading(false); // 로딩 종료
-                },
-              });
-            },
-            fail: (err) => {
-              console.error("Kakao Login Failed:", err);
-              setIsLoading(false); // 로딩 종료
-            },
-          });
-        };
+        //             console.log("서버 응답:", response.data);
+        //             alert("카카오 로그인 성공!");
+        //             navigate('/main');
+        //           } catch (error) {
+        //             console.error("카카오 유저 저장 실패:", error);
+        //             alert("카카오 로그인 중 문제가 발생했습니다.");
+        //           } finally {
+        //             setIsLoading(false); // 로딩 종료
+        //           }
+        //         },
+        //         fail: (err) => {
+        //           console.error("Kakao API Request Failed:", err);
+        //           setIsLoading(false); // 로딩 종료
+        //         },
+        //       });
+        //     },
+        //     fail: (err) => {
+        //       console.error("Kakao Login Failed:", err);
+        //       setIsLoading(false); // 로딩 종료
+        //     },
+        //   });
+        // };
 
 
         const handleFindIdSubmit = async () => {
@@ -273,8 +286,7 @@ function Login() {
     };
     
 
-      
-
+    
       
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -311,7 +323,13 @@ function Login() {
   };
 
   return (
-    <div id="root" inert={!!modalType} className={`login-container ${fadeIn ? 'fade-in' : ''} ${fadeOut ? 'fade-out' : ''}`}>
+    <div id="root" isert={!!modalType} className={`login-container ${fadeIn ? 'fade-in' : ''} ${fadeOut ? 'fade-out' : ''}`}>
+        {/* <div id="root" className={`login-container ${fadeIn ? 'fade-in' : ''} ${fadeOut ? 'fade-out' : ''}`}> 
+        <div
+        id="root"
+        isert={!!modalType ? "true" : "false"}
+        className={`login-container ${fadeIn ? 'fade-in' : ''} ${fadeOut ? 'fade-out' : ''}`}
+        > */}
         {isLoading ? (
             <div className="loading-screen">
                 <img src="/logo.png" alt="Loading..." className="loading-logo" />
@@ -376,7 +394,7 @@ function Login() {
                         <Box display="flex" justifyContent="center" mt={1}>
                             <Button
                                 variant="contained"
-                                onClick={handleKakaoLogin}
+                                // onClick={handleKakaoLogin}
                                 sx={{ backgroundColor: '#FEE500', color: '#000', '&:hover': { backgroundColor: '#FFD700' }, fontWeight: 'bold' }}
                                 fullWidth
                             >
