@@ -17,7 +17,7 @@ import FloatingButton from './components/floatingButton/FloatingButton';
 import Test from './components/board/Test';
 import Feed from './components/board/Feed';
 import YoutubeEmbed from './components/main/YoutubeEmbed.js';
-import MyPage from './components/main/MyPage.js';
+import MyPage from './components/profile/MyPage.js';
 
 
 function App() {
