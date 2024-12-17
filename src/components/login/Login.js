@@ -306,7 +306,10 @@ function Login() {
           type: 'SET_USER_ID',
           payload: response.data.userId, // 서버에서 반환된 userId
         });
-        
+        dispatch({
+          type: 'SET_NICK_NAME',
+          payload: response.data.nickName,
+        });
         setTimeout(() => {
           setFadeOut(true); // 페이드 아웃 시작
           setTimeout(() => navigate('/main'), 500); // 메인으로 이동
@@ -340,8 +343,8 @@ function Login() {
                     <BackgroundBox>
                         <Container sx={{ width: '100%', px: 6, pt: 7 }}>
                             <Typography variant="h4" fontWeight="bold" color="#00DFEE" align="left">
-                                Welcome! <br />
-                                Hello.
+                                감정지옥에 ! <br />
+                                오신걸 환영합니다!.
                             </Typography>
                         </Container>
                     </BackgroundBox>

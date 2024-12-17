@@ -1,33 +1,63 @@
 import React from "react";
 import { Drawer, Box, Grid, IconButton, Typography, Button } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
+import Main from "../main/main";
+import { useLocation } from 'react-router-dom';
 
 // 메뉴 데이터 정의
 const menuData = [
-  { label: "지옥도", path: "/sevenHell", icon: "hellIcon.png" },
-  { label: "유튜브VOD", path: "/YouTubeEmbed", icon: "thumbnail.png" },
-  { label: "Live", path: "/live", icon: "Vod.png" },
-  { label: "메인으로", path: "/main", icon : "casper.png"},
-  { label: "마이페이지", path: "/MyPage", icon : "fireboyreal.png" },
+  { label: "지옥도", path: "/sevenHell", icon: "/hellIcon.png" },
+  { label: "유튜브VOD", path: "/YouTubeEmbed", icon: "/thumbnail.png" },
+  { label: "Live", path: "/YoutubeLive", icon: "/Vod.png" },
+  { label: "메인으로", path: "/main", icon : "/casper.png"},
+  { label: "마이페이지", path: "/MyPage", icon : "/fireboyreal.png" },
 ];
 
-// //사이드바 토글
-//   const toggleSidebar = () => {
-//     setIsSidebarOpen(!isSidebarOpen);
-//   };
 
-const SidebarMenu = ({ isOpen, toggleSidebar, handleMenuClick }) => {
+
+
+const SidebarMenu = ({ isOpen, toggleSidebar}) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+    const handleLogoClick = () => {
+      const currentPath = window.location.pathname;
+
+      if(currentPath === './main'){
+        toggleSidebar();
+        console.log('이미 메인페이지이므로, 사이드바를 닫습니다.');
+      } else {
+        //다른 페이지라면 메인으로 이동
+        navigate('/main'); // 메인페이지로 이동
+        console.log('Logo clicked! 메인으로 이동');
+      }
+    };
+  
+    
+
+  // 메뉴 클릭 핸들러
+  const handleMenuClick = (path) => {
+    navigate(path); // 선택한 메뉴 경로로 이동
+    toggleSidebar(); // 사이드바 닫기
+  };
+
+  
+
   return (
     <>
       {/* 메뉴 아이콘 */}
       <div
         style={{
           position: "absolute",
-          top: "15px",
+          top: "18px",
           left: "12px",
           cursor: "pointer",
-          fontSize: "40px",
+          fontSize: "20px",
+          display: "flex", // Flexbox 활성화
+          alignItems: "center", // 수직 정렬
+          justifyContent: "center", // 가로 정렬
           color: "#83E3E9",
           zIndex: 1,
         }}
@@ -72,9 +102,13 @@ const SidebarMenu = ({ isOpen, toggleSidebar, handleMenuClick }) => {
             }}
           >
             <img
-              src="logo.png"
+              src="/logo.png"
               alt="Logo"
               style={{ height: "70px", cursor: "pointer" }}
+              onClick={() => {
+                console.log("Click event triggered!");
+                handleLogoClick();
+              }}
             />
             <IconButton onClick={toggleSidebar} sx={{ color: "#83E3E9" }}>
               <CloseIcon sx={{ fontSize: 30 }} />
@@ -86,7 +120,7 @@ const SidebarMenu = ({ isOpen, toggleSidebar, handleMenuClick }) => {
               sx={{
                 display: "flex",
                 position: "relative",
-                backgroundImage: `url('hellmap8.png')`,
+                backgroundImage: `url('/hellmap8.png')`,
                 backgroundSize: "cover",
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "center",
@@ -132,7 +166,7 @@ const SidebarMenu = ({ isOpen, toggleSidebar, handleMenuClick }) => {
           <Box
             sx={{
               display: "flex",
-              backgroundImage: `url('hellmap4.png')`,
+              backgroundImage: `url('/hellmap4.png')`,
               backgroundSize: "cover",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "center",
@@ -190,7 +224,7 @@ const SidebarMenu = ({ isOpen, toggleSidebar, handleMenuClick }) => {
           <Box
             sx={{
               display: "flex",
-              backgroundImage: `url('hellmap3.png')`,
+              backgroundImage: `url('/hellmap3.png')`,
               backgroundSize: "cover",
               backgroundRepeat: "no-repeat",
               backgroundPosition: "center",

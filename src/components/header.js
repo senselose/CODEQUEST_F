@@ -1,57 +1,52 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import SidebarMenu from "./menu/SidebarMenu";
-
-
+import CreateIcon from "@mui/icons-material/Create";
 
 const Header = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-
-     //사이드바 토글
+  // 사이드바 토글
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleMenuClick = (path) => {
-    if (path.startsWith("http")) {
-      // 외부 URL로 이동
-      window.location.href = path;
-    } else {
-      // 내부 경로로 이동
-      navigate(path);
-    }
+  // 공통 스타일 정의
+  const commonIconStyle = {
+    position: "absolute",
+    cursor: "pointer",
+    display: "flex", // Flexbox 활성화
+    alignItems: "center", // 수직 정렬
+    justifyContent: "center", // 가로 정렬
+    fontSize: "20px",
+    color: "#83E3E9",
+    zIndex: 1,
   };
-  return (
 
-    
-    <div style={{ position: "relative", height: "8vh", width: "100vw" }}>
-              <div
+  return (
+    <header style={{ position: "relative", height: "8vh", width: "100vw" }}>
+      {/* 메뉴 아이콘 */}
+      <div
         style={{
-          position: "absolute",
-          top: "15px",
+          ...commonIconStyle,
+          top: "18px",
           left: "12px",
-          cursor: "pointer",
-          fontSize: "40px",
-          color: "#83E3E9",
-          zIndex: 1,
         }}
         onClick={toggleSidebar}
-      > 
+      >
         <MenuIcon fontSize="large" />
       </div>
-        {/* 메뉴바 컴포넌트 */}
-        <SidebarMenu
-            isOpen={isSidebarOpen}
-            toggleSidebar={toggleSidebar}
-            handleMenuClick={handleMenuClick}
-        />
 
+      {/* 사이드바 컴포넌트 */}
+      <SidebarMenu isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+
+      {/* 배경 이미지 */}
       <img
-        src="loading_background.gif"
-        alt="Background"
+        src="/loading_background.gif"
+        // alt="Background"
         style={{
           position: "absolute",
           top: 0,
@@ -62,18 +57,40 @@ const Header = () => {
           zIndex: -1,
         }}
       />
+
+      {/* 로고 */}
       <img
-        src="logo.png"
+        // src="/fireboyreal.png"
+        src="/logo.png"
         alt="Logo"
         style={{
-          height: "80px",
-          marginTop: "8px",
+          position: "absolute",
+          height: "50px",
+          top: "10px" ,
+          left : "10px",
+          display: "flex", // Flexbox 활성화
+          alignItems: "center", // 수직 정렬
+          justifyContent: "center", // 가로 정렬
           marginLeft: "50px",
           cursor: "pointer",
           zIndex: 1,
         }}
       />
-    </div>
+
+      {/* '/main' 경로에서만 Create 아이콘 표시 */}
+      {location.pathname === "/main" && (
+        <div
+          style={{
+            ...commonIconStyle,
+            top: "25px",
+            right: "20px",
+          }}
+          onClick={() => navigate("/create")}
+        >
+          <CreateIcon fontSize="medium" />
+        </div>
+      )}
+    </header>
   );
 };
 

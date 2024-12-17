@@ -10,6 +10,8 @@ import {
   Grid,
   createTheme,
 } from "@mui/material";
+import Header from "../header";
+
 
 // 다크모드 테마 생성
 const darkTheme = createTheme({
@@ -29,6 +31,7 @@ const darkTheme = createTheme({
   },
 });
 
+
 const MyPage = () => {
   const [userData, setUserData] = useState({
     nickName: "",
@@ -36,6 +39,8 @@ const MyPage = () => {
     bio: "안녕하세요! 사용자 정보를 불러오는 중입니다.",
     profilePicturePath: "https://via.placeholder.com/150",
   }); // 사용자 데이터 상태
+
+
   const [loading, setLoading] = useState(true); // 로딩 상태 관리
   const navigate = useNavigate();
   const userId = useSelector((state) => state.auth?.userId || null); // Redux에서 userId 가져오기
@@ -121,6 +126,7 @@ const MyPage = () => {
 
   return (
     <ThemeProvider theme={darkTheme}>
+      <Header backgroundSrc="/loading_background.gif" logoSrc="/logo.png" />
       <Box
         sx={{
           marginTop: "50px",
