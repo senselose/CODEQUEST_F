@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import axios from "axios";
 import {
   TextField,
+  Paper,
   Button,
   Chip,
   Typography,
@@ -9,14 +14,38 @@ import {
   Modal,
   Card,
   CardMedia,
+  Container,
   CardActions,
   IconButton,
 } from "@mui/material";
 import DaumPostcode from "react-daum-postcode";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { TextareaAutosize } from "@mui/material"; // 자동 줄바굼 적용하는 텍스트 필드
+
 import DeleteIcon from "@mui/icons-material/Delete";
 import UploadIcon from "@mui/icons-material/Upload";
+import BackButton from "../menu/BackButton";
+
+
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark", // 다크모드 활성화
+    primary: {
+      main: "#90caf9", // 기본 색상
+    },
+    secondary: {
+      main: "#f48fb1", // 보조 색상
+    },
+    background: {
+      default: "#121212", // 배경색
+      paper: "#1d1d1d", // 카드나 페이퍼 색상
+    },
+    text: {
+      primary: "#ffffff", // 기본 텍스트 색상
+      secondary: "#aaaaaa", // 보조 텍스트 색상
+    },
+  },
+});
 
 const BoardForm = () => {
   const [currentLocation, setCurrentLocation] = useState(""); // 현재 위치
@@ -32,6 +61,15 @@ const BoardForm = () => {
 
   const sampleTags = ["학교", "직장", "친구", "연애", "엔터테이먼트"]; // 예제 태그 데이터
   const KAKAO_API_KEY = process.env.REACT_APP_KAKAO_API_KEY; // Kakao API 키
+  
+  const userId = useSelector((state) => state.auth?.userId || null); // Redux에서 userId 가져오기
+  const [userData, setUserData] = useState({
+    nickName: "",
+    email: "",
+    bio: "안녕하세요! 사용자 정보를 불러오는 중입니다.",
+    profilePicturePath: "https://via.placeholder.com/150",
+  }); // 사용자 데이터 상태
+
 
   // Kakao Maps SDK 동적 로드
   useEffect(() => {
@@ -193,210 +231,227 @@ const BoardForm = () => {
 };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{
-        maxWidth: 600,
-        margin: "0 auto",
-        padding: 2,
-        boxShadow: 3,
-        borderRadius: 2,
-        backgroundColor: "#121212",
-        color: "#ffffff",
-      }}
-    >
-      <Typography variant="h4" gutterBottom>
-        게시글 작성
-      </Typography>
+    <ThemeProvider theme={darkTheme}>
 
-      <TextField
-        label="닉네임"
-        value={nickname}
-        onChange={(e) => setNickname(e.target.value)}
-        fullWidth
-        margin="normal"
-        required
-        InputLabelProps={{ style: { color: "#ffffff" } }}
-        sx={{
-          "& .MuiInputBase-root": { color: "#ffffff" },
-          "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ffffff" },
-        }}
-      />
+    {/* 글쓰기 진입시, 헤더의 존재가 의미가 모호해지므로, 뒤로 가기 버튼으로 변경해주기! */}
+    <BackButton style={{ zIndex: -1 }} />
 
-      <TextField
-        label="제목"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        fullWidth
-        margin="normal"
-        required
-        InputLabelProps={{ style: { color: "#ffffff" } }}
-        sx={{
-          "& .MuiInputBase-root": { color: "#ffffff" },
-          "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ffffff" },
-        }}
-      />
-
-      <Box sx={{ marginBottom: 2 }}>
-        <Typography variant="body1">주소</Typography>
-        <Button
-          onClick={handleOpenModal}
-          variant="outlined"
-          sx={{ color: "#ffffff", borderColor: "#ffffff" }}
-        >
-          주소 검색
-        </Button>
-        <Typography variant="body2" sx={{ marginTop: 1 }}>
-          {selectedLocation || currentLocation || "주소를 선택해주세요."}
-        </Typography>
-      </Box>
-
-      <Modal open={isModalOpen} onClose={handleCloseModal}>
         <Box
+          component="form"
+          onSubmit={handleSubmit}
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
+            maxWidth: 600,
+            margin: "0 auto",
+            padding: 4,
+            boxShadow: 3,
             borderRadius: 2,
+            backgroundColor: "#282828",
+            // backgroundColor: "#134f33",
+            color: "#ffffff",
           }}
         >
-          <DaumPostcode onComplete={handleCompleteAddress} />
-        </Box>
-      </Modal>
+          <Typography variant="h6" gutterBottom textAlign="center">
+            감정 털기
+          </Typography>
 
-      <Autocomplete
-        multiple
-        freeSolo
-        options={sampleTags}
-        value={tags}
-        onChange={(event, newValue) => setTags(newValue)}
-        renderInput={(params) => (
           <TextField
-            {...params}
-            label="태그"
-            placeholder="태그를 추가하세요"
+            label="닉네임"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            fullWidth
+            size="small"
+            variant="standard"
             margin="normal"
+            required
             InputLabelProps={{ style: { color: "#ffffff" } }}
             sx={{
               "& .MuiInputBase-root": { color: "#ffffff" },
               "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ffffff" },
             }}
           />
-        )}
-        sx={{
-          "& .MuiAutocomplete-listbox": {
-            backgroundColor: "#333333", // 드롭다운 배경색
-            color: "#ffffff", // 드롭다운 텍스트 색상
-          },
-          "& .MuiAutocomplete-option": {
-            color: "#ffffff", // 기본 옵션 텍스트 색상
-            "&[aria-selected='true']": {
-              backgroundColor: "#1e88e5", // 선택된 옵션 배경색
-              color: "#ffffff", // 선택된 옵션 텍스트 색상
-              fontWeight: "bold", // 선택된 옵션 강조
-            },
-            "&:hover": {
-              backgroundColor: "#555555", // 옵션 호버 시 배경색
-            },
-          },
-          "& .MuiChip-root": {
-            backgroundColor: "#1e88e5", // 선택된 태그 배경색
-            color: "#ffffff", // 선택된 태그 텍스트 색상
-          },
-        }}
-      />
-      {/* 이미지 업로드 */}
-      <Box sx={{ marginBottom: 2 }}>
-        <Typography variant="body1">이미지 업로드</Typography>
-        <Button
-          variant="outlined"
-          component="label"
-          startIcon={<UploadIcon />}
-          sx={{ display: "block", margin: "0 auto", marginTop: 2 }}
-        >
-          이미지 선택
-          <input
-            type="file"
-            accept="image/*"
+          <Autocomplete
             multiple
-            hidden
-            onChange={handleImageUpload}
-          />
-        </Button>
-      </Box>
-
-      {/* 업로드된 이미지 미리 보기 - 가로 스크롤 */}
-      <Box
-        sx={{
-          display: "flex",
-          overflowX: "auto",
-          padding: 1,
-          gap: 2,
-        }}
-      >
-        {imagePreviews.map((preview, index) => (
-          <Card
-            key={index}
+            freeSolo
+            options={sampleTags}
+            value={tags}
+            onChange={(event, newValue) => setTags(newValue)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="태그"
+                placeholder="태그를 추가하세요"
+                margin="normal"
+                size="small"
+                variant="standard"
+                InputLabelProps={{ style: { color: "#ffffff" } }}
+                sx={{
+                  "& .MuiInputBase-root": { color: "#ffffff" },
+                  "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ffffff" },
+                }}
+              />
+            )}
             sx={{
-              minWidth: 140,
-              position: "relative",
-              flexShrink: 0,
+              "& .MuiAutocomplete-listbox": {
+                backgroundColor: "#333333", // 드롭다운 배경색
+                color: "#ffffff", // 드롭다운 텍스트 색상
+              },
+              "& .MuiAutocomplete-option": {
+                color: "#ffffff", // 기본 옵션 텍스트 색상
+                "&[aria-selected='true']": {
+                  backgroundColor: "#1e88e5", // 선택된 옵션 배경색
+                  color: "#ffffff", // 선택된 옵션 텍스트 색상
+                  fontWeight: "bold", // 선택된 옵션 강조
+                },
+                "&:hover": {
+                  backgroundColor: "#555555", // 옵션 호버 시 배경색
+                },
+              },
+              "& .MuiChip-root": {
+                backgroundColor: "#1e88e5", // 선택된 태그 배경색
+                color: "#ffffff", // 선택된 태그 텍스트 색상
+              },
+            }}
+          />
+          <TextField
+            label="제목을 입력해주세요"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            fullWidth
+            size="small"
+            margin="normal"
+            variant="standard"
+            required
+            InputLabelProps={{ style: { color: "#ffffff" } }}
+            sx={{
+              "& .MuiInputBase-root": { color: "#ffffff" },
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ffffff" },
+            }}
+          />
+
+          <Box sx={{ marginBottom: 2 }}>
+            <Typography variant="body1">주소</Typography>
+            <Button
+              onClick={handleOpenModal}
+              variant="standard"
+              sx={{ color: "#ffffff", borderColor: "#black" }}
+            >
+              주소 검색
+            </Button>
+            <Typography variant="body2" sx={{ marginTop: 1 }}>
+              {selectedLocation || currentLocation || "주소를 선택해주세요."}
+            </Typography>
+          </Box>
+
+          <Modal open={isModalOpen} onClose={handleCloseModal}>
+            <Box
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: 400,
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                p: 4,
+                borderRadius: 2,
+              }}
+            >
+              <DaumPostcode onComplete={handleCompleteAddress} />
+            </Box>
+          </Modal>
+          {/* 이미지 업로드 */}
+          <Box sx={{ marginBottom: 2 }}>
+            <Typography variant="body1">이미지 업로드</Typography>
+            <Button
+              variant="outlined"
+              component="label"
+              size="small"
+              startIcon={<UploadIcon />}
+              sx={{ display: "block", margin: "0 auto", marginTop: 2, paddingTop : 1}}
+            >
+              이미지 선택
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                hidden
+                onChange={handleImageUpload}
+              />
+            </Button>
+          </Box>
+
+          {/* 업로드된 이미지 미리 보기 - 가로 스크롤 */}
+          <Box
+            sx={{
+              display: "flex",
+              overflowX: "auto",
+              padding: 1,
+              gap: 2,
             }}
           >
-            <CardMedia
-              component="img"
-              alt={`Uploaded ${index}`}
-              height="140"
-              image={preview}
-            />
-            <CardActions>
-              <IconButton
-                aria-label="delete"
-                onClick={() => handleDeleteImage(index)}
-                color="error"
+            {imagePreviews.map((preview, index) => (
+              <Card
+                key={index}
+                sx={{
+                  minWidth: 140,
+                  position: "relative",
+                  flexShrink: 0,
+                }}
               >
-                <DeleteIcon />
-              </IconButton>
-            </CardActions>
-          </Card>
-        ))}
-      </Box>
+                <CardMedia
+                  component="img"
+                  alt={`Uploaded ${index}`}
+                  height="140"
+                  image={preview}
+                />
+                <CardActions>
+                  <IconButton
+                    aria-label="delete"
+                    onClick={() => handleDeleteImage(index)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </CardActions>
+              </Card>
+            ))}
+          </Box>
 
-      <TextField
-        label="내용"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        fullWidth
-        multiline
-        rows={5}
-        margin="normal"
-        required
-        InputLabelProps={{ style: { color: "#ffffff" } }}
-        sx={{
-          "& .MuiInputBase-root": { color: "#ffffff" },
-          "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ffffff" },
-        }}
-      />
+          <TextField
+            label="내용"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            fullWidth
+            multiline
+            rows={5}
+            margin="normal"
+            required
+            InputLabelProps={{ style: { color: "#ffffff" } }} // 텍스트 필드 안에 라벨 폰트 적용 style
+            sx={{
+              "& .MuiInputBase-root": { 
+                color: "#ffffff", // 텍스트 색상
+                overflowWrap: "break-word", // 긴 단어 줄바꿈
+                wordWrap: "break-word", // 추가 줄바꿈 처리
+                whiteSpace: "pre-wrap", // 공백 및 줄바꿈 유지
+                },
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ffffff" },
+            }}
+          />
 
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        sx={{
-          marginTop: 3,
-          backgroundColor: "#1e88e5",
-        }}
-        fullWidth
-      >
-        게시글 작성
-      </Button>
-    </Box>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            sx={{
+              marginTop: 3,
+              backgroundColor: "#1e88e5",
+            }}
+            fullWidth
+          >
+            게시글 작성
+          </Button>
+        </Box>
+    </ThemeProvider>
   );
 };
 
