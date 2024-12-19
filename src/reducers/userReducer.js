@@ -1,7 +1,6 @@
 const initialState = {
     userId: null,
-    nickName: null, // 닉네임 추가
-
+    isAuthenticated: false, // 로그인 여부 추가
   };
   
   const userReducer = (state = initialState, action) => {
@@ -11,13 +10,16 @@ const initialState = {
         return {
           ...state,
           userId: action.payload,
+          isAuthenticated: true, // 로그인 상태 true
         };
-        // case "SET_NICK_NAME":
-        //   console.log('액션 payload 닉네임:', action.payload); // 여기서 값 확인
-        //   return {
-        //     ...state,
-        //     nickName: action.payload, // Redux state 업데이트
-        //   };
+
+        case 'LOGOUT':
+          return {
+            ...state,
+            userId: null,
+            isAuthenticated: false, // 로그인 상태 false
+          }
+        
       default:
         return state;
     }
