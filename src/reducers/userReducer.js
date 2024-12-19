@@ -1,5 +1,6 @@
 const initialState = {
     userId: null,
+    isAuthenticated: false, // 로그인 여부 추가
   };
   
   const userReducer = (state = initialState, action) => {
@@ -9,7 +10,15 @@ const initialState = {
         return {
           ...state,
           userId: action.payload,
+          isAuthenticated: true, // 로그인 상태 true
         };
+
+        case 'LOGOUT':
+          return {
+            ...state,
+            userId: null,
+            isAuthenticated: false, // 로그인 상태 false
+          }
         
       default:
         return state;

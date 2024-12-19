@@ -288,25 +288,60 @@ function Login() {
 
     
       
-  const handleLogin = async (e) => {
+//   const handleLogin = async (e) => {
+//     e.preventDefault();
+//     setIsLoading(true); // 로딩 시작
+//     try {
+//         // const response = await axios.post('http://localhost:8080/api/auth/login', { id, password }); // 되는코드
+//         const response = await axios.post('http://localhost:8080/api/auth/login', { id, password }, { withCredentials: true }); // 지은 수정 1차 (토큰x)
+//       // const response = await axios.post('http://192.168.45.217:8080/api/auth/login', { id, password });
+//     //   const response = await axios.post('http://192.168.45.217:8080/api/auth/login', { id, password }, 
+//     //     {
+//     //       headers: {
+//     //         Host: '192.168.0.39:3000', // 요청 헤더 추가
+//     //       },
+//     //     });
+//       console.log(response.data.userId)
+//       if (response.data.userId) {
+//         dispatch({
+//           type: 'SET_USER_ID',
+//           payload: response.data.userId, // 서버에서 반환된 userId
+//         });
+        
+//         // 페이드 아웃 애니메이션 및 페이지 전환
+//         setTimeout(() => {
+//           setFadeOut(true); // 페이드 아웃 시작
+//           setTimeout(() => navigate('/main'), 500); // 메인으로 이동
+//         }, 2000); // 로딩 지속 시간
+//       } else {
+//         alert("로그인 실패");
+//         setIsLoading(false); // 로딩 종료
+//       }
+//     } catch (error) {
+//       console.error("Login error:", error);
+//       alert("로그인 중 오류가 발생했습니다.");
+//       setIsLoading(false); // 로딩 종료
+//     }
+//   };
+
+const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true); // 로딩 시작
     try {
-        const response = await axios.post('http://localhost:8080/api/auth/login', { id, password });
-      // const response = await axios.post('http://192.168.45.217:8080/api/auth/login', { id, password });
-    //   const response = await axios.post('http://192.168.45.217:8080/api/auth/login', { id, password }, 
-    //     {
-    //       headers: {
-    //         Host: '192.168.0.39:3000', // 요청 헤더 추가
-    //       },
-    //     });
+        const response = await axios.post('http://localhost:8080/api/auth/login', { id, password }, { withCredentials: true }); // 지은 수정 1차 (토큰x)
       console.log(response.data.userId)
-      if (response.data.userId) {
+      
+      if (response.data.token) {
+        // 서버에서 반환한 토큰을 로컬 스토리지에 저장
+        localStorage.setItem("token", response.data.token);
+  
+        // Redux에 userId 저장
         dispatch({
           type: 'SET_USER_ID',
           payload: response.data.userId, // 서버에서 반환된 userId
         });
-        
+  
+        // 페이드 아웃 애니메이션 및 페이지 전환
         setTimeout(() => {
           setFadeOut(true); // 페이드 아웃 시작
           setTimeout(() => navigate('/main'), 500); // 메인으로 이동
