@@ -11,6 +11,7 @@ const FloatingButton = () => {
   if (!userId) {
     return null; // 로그인되지 않은 경우 버튼 렌더링 안 함
   }
+  
 
   const handleClick = () => {
     if (!expanded) {

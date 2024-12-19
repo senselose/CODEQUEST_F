@@ -342,6 +342,7 @@ const handleLogin = async (e) => {
         });
   
         // 페이드 아웃 애니메이션 및 페이지 전환
+
         setTimeout(() => {
           setFadeOut(true); // 페이드 아웃 시작
           setTimeout(() => navigate('/main'), 500); // 메인으로 이동
@@ -375,8 +376,8 @@ const handleLogin = async (e) => {
                     <BackgroundBox>
                         <Container sx={{ width: '100%', px: 6, pt: 7 }}>
                             <Typography variant="h4" fontWeight="bold" color="#00DFEE" align="left">
-                                Welcome! <br />
-                                Hello.
+                                감정지옥에 ! <br />
+                                오신걸 환영합니다!.
                             </Typography>
                         </Container>
                     </BackgroundBox>

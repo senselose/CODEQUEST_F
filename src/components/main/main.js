@@ -22,6 +22,12 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import SidebarMenu from "../menu/SidebarMenu";
 import Header from "../header";
+import Carousel from "./Carousel";
+import CssBaseline from "@mui/material/CssBaseline";
+import CreateIcon from '@mui/icons-material/Create';
+// import { dark } from "@mui/material/styles/createPalette";
+
+
   // 다크모드 테마 생성
   const darkTheme = createTheme({
     palette: {
@@ -40,6 +46,22 @@ import Header from "../header";
     },
   });
 
+  const lightTheme = createTheme({
+    palette: {
+      mode: "light",
+      primary: {
+        main: "#ffffff",
+      },
+      background: {
+        default: "#ffffff",
+        paper: "#ffffff",
+      },
+      text: {
+        primary: "#000000",
+        secondary: "#000000",
+      },
+    },
+  });
   
 const Main = ({ posts = [] }) => {
   // posts의 기본값을 빈 배열로 설정
@@ -47,7 +69,13 @@ const Main = ({ posts = [] }) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [filteredPosts, setFilteredPosts] = useState([]); // 초기값 빈 배열
   // const navigate = useNavigate();
+  const images = [
+    "/carousel1.png",
+    "/carousel2.png",
+    "/carousel4.png",
 
+  ]; 
+  // 캐러셀 이미지
 
 
   const sortCriteria = [
@@ -131,17 +159,20 @@ const Main = ({ posts = [] }) => {
 
   return (
     <ThemeProvider theme={darkTheme}>
+      <CssBaseline/>
       <div style={{ position: "relative" }}>
         {/* 메뉴바 컴포넌트 */}
         <Header backgroundSrc="loading_background.gif" logoSrc="logo.png" />
 
-        {/* 상단 탭 */}
+        {/* 상단 탭 3개 */}
         <Box
           sx={{
             width: "100%",
             maxWidth: "1200px",
             margin: "0 auto",
-            marginTop: "0px",
+            // marginTop: "2px",
+            marginBottom: "20px",
+            height : "30px", 
           }}
         >
           <Tabs
@@ -169,12 +200,16 @@ const Main = ({ posts = [] }) => {
           </Tabs>
         </Box>
         {/* 탭 내용 */}
-        <BoardList
-          posts={filteredPosts}
-          showSearch={false}
-          showWriteButton={false}
-          sortCriteria={sortCriteria[selectedTab]}
-        />
+        <Box
+          style={{ height: "566px" }} // 게시글 리스트 불러오는 box 직접 높이 지정
+        >
+          <BoardList
+            posts={filteredPosts}
+            showSearch={false}
+            showWriteButton={false}
+            sortCriteria={sortCriteria[selectedTab]}
+          />
+        </Box>
         {/* <div style={{ padding: "20px" }}>
         {filteredPosts.length > 0 ? (
           <BoardList posts={filteredPosts} showSearch={false} showWriteButton={false} />
@@ -185,7 +220,22 @@ const Main = ({ posts = [] }) => {
         )}
       </div> */}
       </div>
+      
+      {/* 캐러셀 */}
+      {/* <Box
+        sx={{
+          width: "100%",
+          // maxWidth: "1200px",
+          // padding: "10px", // 내부 여백
+          backgroundColor: "rgba(0, 0, 0, 0)", // 어두운 배경
+          borderRadius: "20px", // 둥근 모서리
+          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.7)", // 그림자 효과
+        }}
+      >
+        <Carousel images={images} width="100%" height="400px" />
+      </Box> */}
     </ThemeProvider>
+
   );
 };
 export default Main;

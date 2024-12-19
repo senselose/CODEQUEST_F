@@ -67,8 +67,9 @@ import BoardList from './components/board/BoardList';
 import BoardDetail from './components/board/BoardDetail'; // BoardDetail import 추가
 import Register from './components/login/Register';
 import Main from './components/main/main';
-import SevenHell from './components/menu/SevenHell';
+import SevenHell from './components/hellmap/SevenHell';
 // import HellPages from './components/main/pages/HellPages'; // 경로에 맞게 수정
+import VillainUploader from "./components/hellmap/VillainUploader.js";
 
 import { Provider } from "react-redux"; // 지은 추가
 import store, { persistor } from "./reducers/store"; // store.js 경로에 맞게 수정 지은 추가
@@ -79,10 +80,14 @@ import Feed from './components/board/Feed';
 import YoutubeEmbed from './components/menu/YoutubeEmbed.js';
 import Header from "./components/header.js"; // 경로에 따라 수정
 import MyPage from './components/profile/MyPage.js';
+
 import { PersistGate } from 'redux-persist/integration/react'; // 지은 추가
 import AuthCheck from './components/auth/AuthCheck.js'; // 지은 추가
 import MyPosts from './components/profile/MyPosts.js'; // 지은 추가
 import MyComments from './components/profile/MyComments.js'; // 지은 추가
+
+import YoutubeLive from './components/menu/YoutubeLive.js';
+
 
 
 function App() {
@@ -98,12 +103,14 @@ function App() {
             <Route path="/create" element={<BoardForm />} />
             <Route path="/main" element={<Main />} />
             <Route path="/YoutubeEmbed" element={<YoutubeEmbed />} />
+            <Route path="/YoutubeLive" element={<YoutubeLive />} />
             <Route path="/MyPage" element={<MyPage />} />
             <Route path="/my-posts" element={<MyPosts/>}/>
             <Route path="/my-comments" element={<MyComments/>}/>
 
             {/* 기본 경로 */}
               <Route path="/sevenHell" element={<SevenHell />} />
+              <Route path="/VillainUploader" element={<VillainUploader />} />
 
 
             <Route path="/BoardList" element={<BoardList />} /> {/* 오타 수정 */}
@@ -118,7 +125,6 @@ function App() {
         </Router>
       </PersistGate>
     </Provider>
-    
   );
 }
 

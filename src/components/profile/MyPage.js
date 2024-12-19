@@ -17,6 +17,7 @@ import {
   Checkbox,
   DialogActions,
 } from "@mui/material";
+
 import CameraswitchIcon from '@mui/icons-material/Cameraswitch';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close'; // X 아이콘 가져오기
@@ -25,6 +26,8 @@ import { borderBottom, display, padding } from "@mui/system";
 import EditNoteIcon from '@mui/icons-material/EditNote'; // 게시글 확인 (내가 쓴 글)
 import ChatIcon from '@mui/icons-material/Chat'; // 게시글 확인 (내가 쓴 댓글)
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'; // > 아이콘
+import Header from "../header";
+
 
 // // 다크모드 테마 생성
 // const darkTheme = createTheme({
@@ -44,6 +47,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'; // 
 //   },
 // });
 
+
 // const MyPage = () => {
 //   const [userData, setUserData] = useState({
 //     nickName: "",
@@ -54,7 +58,6 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'; // 
 //   const [loading, setLoading] = useState(true); // 로딩 상태 관리
 //   const navigate = useNavigate();
 //   const userId = useSelector((state) => state.auth?.userId || null); // Redux에서 userId 가져오기
-
 //   // 백엔드에서 사용자 데이터 가져오기
 //   useEffect(() => {
 //     if (!userId) return;
@@ -134,6 +137,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'; // 
 //     return <div>로딩 중...</div>;
 //   }
 
+
 //   return (
 //     <ThemeProvider theme={darkTheme}>
 //       <Box
@@ -154,7 +158,6 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'; // 
 //           style={{ display: "none" }}
 //           onChange={handleAvatarChange}
 //         />
-
 //         {/* 프로필 아바타 */}
 //         <Avatar
 //           src={userData.profilePicturePath}
